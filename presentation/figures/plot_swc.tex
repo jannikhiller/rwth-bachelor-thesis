@@ -1,0 +1,31 @@
+\pgfplotsset{compat=1.18}
+
+
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+    \begin{loglogaxis}[
+        xlabel={Number of States},
+        ylabel={Time (s)},
+        width=8cm,
+        legend pos=outer north east,
+        ytick={1e-3,1e-2,1e-1,1e0,1e1,1e2}, % Regular ticks
+        yticklabels={$\leq10^{-3}$,$10^{-2}$,$10^{-1}$,$10^0$,$10^1$,$10^2$},
+    ]
+    \addplot[myblue, mark=triangle*] table[x=number_of_states, y=storm_reachability, col sep=comma] {figures/data/bad_runtime_example.csv};
+    \addlegendentry{Storm}
+
+    \addplot[mygreen, mark=square*] table[x=number_of_states, y=prism_reachability, col sep=comma] {figures/data/bad_runtime_example.csv};
+    \addlegendentry{PRISM-games}
+
+    \only<2->{
+    \addplot[mypink, mark=pentagon*] table[x=number_of_states, y=prism_symbolic_reachability, col sep=comma] {figures/data/bad_runtime_example.csv};
+    \addlegendentry{PRISM-games (dd)}
+    }
+    \end{loglogaxis}
+\end{tikzpicture}
+\label{fig:plot_swc}
+\end{figure}
+
+

@@ -1,0 +1,115 @@
+
+% Typesetting
+\usepackage[utf8]{inputenc} % enable post-90s text processing
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{pgfplotstable} % Required for reading CSV and creating tables
+\usepackage{makecell}
+\usepackage{dirtytalk}
+\usepackage{lmodern} % upgrade default font
+\usepackage[sc]{mathpazo} % pretty font for text
+\usepackage{pdfpages}
+\usepackage{nicefrac}
+\usepackage{csquotes}
+\usepackage{nameref}
+\usepackage{parskip}
+\usepackage{relsize}
+\usepackage{listings}
+\usepackage{empheq}
+
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    captionpos=b,
+    breaklines=false,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    numbers=left, 
+            framexleftmargin=4pt,
+}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\usepackage{float}
+\newfloat{lstfloat}{t}{lop}
+\floatname{lstfloat}{Listing}
+
+
+% Math & Symbols
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+
+\usepackage{braket}
+\usepackage{cool}
+\usepackage{accents}
+\usepackage{stackengine}
+
+
+\usepackage{bm}
+\usepackage{nicefrac}
+\usepackage[super]{nth}
+\usepackage{hyphenat}
+
+\usepackage{thmtools}
+\usepackage[export]{adjustbox}
+\usepackage{graphicx}
+
+% Utilities
+\usepackage{lipsum} 
+\usepackage{varioref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\creflabelformat{equation}{#2\textup{#1}#3}
+\renewcommand{\cref}{\Cref} % uppercase for all crefs
+
+
+% Colors
+\usepackage[svgnames]{xcolor}
+% https://s3.amazonaws.com/edwardtufte.com/colorblind_palette.png
+
+\definecolor{myorange}{RGB}{230,159,0} 
+\definecolor{myblue}{RGB}{55,126,184}
+\definecolor{mygreen}{RGB}{77,175,74}
+\definecolor{myred}{RGB}{228,26,28}
+\definecolor{mypink}{RGB}{204,121,167}
+\definecolor{mygray}{rgb}{0.66, 0.66, 0.66}
+\definecolor{teal}{HTML}{23373b}
+\definecolor{orange}{HTML}{EB811B}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Environments
+\usepackage{array}
+\usepackage{blkarray}  % cool blockarrays
+\usepackage[most]{tcolorbox}
+
+% A nice way to comment the text is given by the following:
+\usepackage{todonotes}
+\setlength{\marginparwidth}{3cm}
+\usepackage{marginnote}
+
+\usepackage{tikz}
+\usetikzlibrary{automata,arrows,positioning,calc,fit,backgrounds,shapes.geometric,overlay-beamer-styles}
+%\tikzset{snake arrow/.style={->,decorate, decoration={snake, amplitude=.4mm,segment length=2mm, post length=1mm}}}
+%\tikzset{snake line/.style={decorate, decoration={snake, amplitude=.4mm,segment length=2mm}}}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\) #1}
+
+\usepackage{float}
+
+\usepackage{hyphenat}
+\hyphenation{non-termination non-deterministic non-probabilistic}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}

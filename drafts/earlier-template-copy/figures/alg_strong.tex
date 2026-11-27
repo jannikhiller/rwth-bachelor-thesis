@@ -1,0 +1,46 @@
+\begin{algorithm}[t!]
+    \caption{Computation of Strong Attractors}\label{alg:satr}
+    \begin{algorithmic}[1]
+        \Procedure{StrongAttractors}{$S_0, S_1, A, \Delta, i, T, S_\text{allowed}, \Delta_\text{allowed}$}
+            \State $\satr\gets  T$
+            \State $\Delta_{\satr} \gets\emptyset$
+            \State $B\gets T$
+
+            \While{$B\neq\emptyset$}
+                \State $P\gets\Pred_\Delta(B)\setminus\satr$\label{alg:satr:pred}
+                \State $B\gets\emptyset$
+                \ForAll{$s\in P$}\label{alg:satr:bdelta}
+                    \ForAll{$a\in A$ with $\Delta(s, a)\neq\bot$}
+                        \If{$\Succ_\Delta((s, a))\cap\satr\neq\emptyset$ and $(s, a)\in\Delta_\text{allowed}$}
+                            \State $\Delta_{\satr}\gets \Delta_{\satr}\cup\set{(s, a)}$
+                        \EndIf
+                    \EndFor
+                \EndFor\label{alg:satr:edelta}
+                \State $P\gets P\cap S_\text{allowed}$\label{alg:satr:allowed}
+                \ForAll{$s\in P$}\label{alg:satr:bcheck}
+                    \If{$s\in S_i$}
+                        \ForAll{$s\in A(s)$}
+                            \If{$s\in\Delta_{\satr}$}
+                                \State $B\gets\set{s}$
+                                \State\textbf{break}
+                            \EndIf
+                        \EndFor
+                    \Else
+                        \State $\text{good }\gets true$
+                        \ForAll{$a\in A(s)$}
+                            \If{$(s, a)\notin\Delta_{\satr}$}
+                                \State $\text{good }\gets false$
+                                \State\textbf{break}
+                            \EndIf
+                        \EndFor
+                        \If{good}
+                            \State $B\gets\set{s}$
+                        \EndIf
+                    \EndIf
+                \EndFor\label{alg:satr:echeck}
+                \State $\satr\gets\satr\cup B$
+            \EndWhile
+            \State \textbf{return} $\satr, \Delta_{\satr}$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,173 @@
+% abs, norm
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
+
+
+
+%%%%%%%%%%%%%% Theorem boxes 
+\tcbuselibrary{theorems}
+\tcbset{boxrule=0pt,toprule=1pt}
+
+\newtheoremstyle{theoremdd}% name of the style to be used
+  {0.5\baselineskip}% measure of space to leave above the theorem. E.g.: 3pt
+  {0.5\baselineskip}% measure of space to leave below the theorem. E.g.: 3pt
+  {}% name of font to use in the body of the theorem
+  {}% measure of space to indent
+  {\bfseries}% name of head font
+  {:}% punctuation between head and body
+  {.5em}% space after theorem head; " " = normal interword space
+  {}
+\theoremstyle{theoremdd}
+
+\newcommand{\newcooltheorem}[5]{%
+  \makeatletter
+  \Crefname{tcb@cnt@#1}{#2}{#2s}%
+  %\Crefname{tcb@cnt@#1}{#2}
+  \makeatother
+  \newtcbtheorem[list inside=#1, number within=chapter]{#1}{#2}{
+    % if number within section: add thesection to enumthm cref
+    % Example Frame Start
+    empty,% Empty previously set parameters
+    % Attaching a box requires an overlay
+    attach boxed title to top left,
+    % Ensures proper line breaking in longer titles
+    minipage boxed title,
+    % (boxed title style requires an overlay)
+    boxed title style={empty,size=minimal, 
+    toprule=0pt,top=4pt,left=3mm},
+    % title formatting
+    coltitle=black,fonttitle=\scshape,description font=\normalfont\bfseries\sffamily, separator sign={. },
+    % spacing
+    before=\par\medskip\noindent,parbox=false,boxsep=0pt,left=3mm,right=3mm,top=5pt,breakable,pad at break=0mm,
+    before upper=\csname @totalleftmargin\endcsname0pt, % Use instead of parbox=true. 
+    %This ensures parskip is inherited by box.
+    %
+    % Handles box when it exists on one page only
+    overlay unbroken={\draw[#4,line width=.5pt] ([xshift=-0pt]title.north west) -- ([xshift=-0pt]frame.south west); 
+    \begin{scope}[on background layer]
+      \fill[#5] 
+      (frame.south west) -- 
+      (title.north west) -- 
+      ([xshift=3mm]title.north east) --
+      (frame.south east);
+      % \node (box) [fill=blue!20, fit = {(frame.south west),
+      % (title.north west),
+      % (title.north east),
+      % (frame.south east)}{};
+    \end{scope}[on background layer]
+    },
+    % Handles multipage box: first page
+    overlay first={\draw[#4,line width=.5pt] ([xshift=-0pt]title.north west) -- ([xshift=-0pt,yshift=-3mm]frame.south west); 
+    \begin{scope}[on background layer]
+      \fill[#5] 
+      ([yshift=-3mm]frame.south west) -- 
+      (title.north west) -- 
+      ([xshift=3mm]title.north east) --
+      ([yshift=-3mm]frame.south east);
+      \end{scope}[on background layer]
+    },
+    % Handles multipage box: middle page
+    overlay middle={\draw[#4,line width=.5pt] ([xshift=-0pt, yshift=3mm]frame.north west) -- ([xshift=-0pt]frame.south west); 
+    \begin{scope}[on background layer]
+      \fill[#5] 
+      (frame.south west) -- 
+      ([yshift=3mm]frame.north west) -- 
+      ([yshift=3mm]frame.north east) --
+      (frame.south east);
+      \end{scope}[on background layer]
+    },
+    % Handles multipage box: last page
+    overlay last={\draw[#4,line width=.5pt] ([xshift=-0pt, yshift=3mm]frame.north west) -- ([xshift=-0pt]frame.south west); 
+    \begin{scope}[on background layer]
+      \fill[#5] 
+      (frame.south west) -- 
+      ([yshift=3mm]frame.north west) -- 
+      ([yshift=3mm]frame.north east) --
+      (frame.south east);
+      \end{scope}[on background layer]
+      },%
+    }{#3}%
+}%
+
+\newcooltheorem{mydefinition}{Definition}{def}{myblue}{white} %{skyblue!70!black}   % todo rot/orange (?)
+\newcooltheorem{myexample}{Example}{ex}{mygreen}{mygreen, opacity=0.07} %{bluishgreen!70!black}      % todo grün
+\newcooltheorem{mytheorem}{Theorem}{theo}{myred}{white} %{reddishpurple!70!black}  %todo blau
+\newcooltheorem{mylemma}{Lemma}{theo}{myred}{white}
+\newcooltheorem{myproposition}{Proposition}{theo}{myred}{white}
+\newcooltheorem{mycorollary}{Corollary}{theo}{myred}{white} 
+\newcooltheorem{myproblem}{Problem}{prob}{mypink}{mypink, opacity=0.1}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[chapter]
+
+% footnotemarks inside align
+\makeatletter
+\let\original@footnotemark\footnotemark
+\newcommand{\align@footnotemark}{%
+  \ifmeasuring@
+    \chardef\@tempfn=\value{footnote}%
+    \original@footnotemark
+    \setcounter{footnote}{\@tempfn}%
+  \else
+    \iffirstchoice@
+      \original@footnotemark
+    \fi
+  \fi}
+\pretocmd{\start@align}{\let\footnotemark\align@footnotemark}{}{}
+\makeatother
+
+\newcommand{\defeq}{\vcentcolon=}
+\newcommand{\eqdef}{=\vcentcolon}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Pred}{\operatorname{Pred}}
+\newcommand{\Succ}{\operatorname{Succ}}
+\newcommand{\Reach}{\operatorname{Reach}}
+\newcommand{\Cone}{\operatorname{Cone}}
+\newcommand{\satr}{\operatorname{satr}}
+\newcommand{\watr}{\operatorname{watr}}
+\newcommand{\ASReach}{\operatorname{ASReach}}
+\renewcommand{\Pr}{\operatorname{Pr}}
+\newcommand\CC{
+    C++
+}
+\renewcommand{\set}[1]{\mathopen{}\left\{\;\!#1\;\!\right\}\mathclose{}}
+
+\def\until{\mathsf{U}}
+
+\newcommand{\mycomment}[2][]{\todo[size=\footnotesize, #1]{#2}}
+\newcommand{\mytodo}[2][]{\todo[color=red, size=\footnotesize, #1]{TODO: #2}}
+
+% multiline stuff for algpseudocode
+\iffalse
+\newcommand\CONDITION[2]%
+   {\begin{tabular}[t]{@{}l@{}}#1#2\end{tabular}}
+\algdef{SE}[WHILE]{While}{EndWhile}[1]%
+   {\algorithmicwhile\ \CONDITION{#1}{\ \algorithmicdo}}%
+   {\algorithmicend\ \algorithmicwhile}
+\algdef{SE}[FOR]{For}{EndFor}[1]%
+   {\algorithmicfor\ \CONDITION{#1}{\ \algorithmicdo}}%
+   {\algorithmicend\ \algorithmicfor}
+\algdef{S}[FOR]{ForAll}[1]%
+   {\algorithmicforall\ \CONDITION{#1}{\ \algorithmicdo}}
+\algdef{SE}[REPEAT]{Repeat}{Until}%
+   {\algorithmicrepeat}[1]%
+   {\algorithmicuntil\ \CONDITION{#1}{}}
+\algdef{SE}[IF]{If}{EndIf}[1]%
+   {\algorithmicif\ \CONDITION{#1}{\ \algorithmicthen}}%
+   {\algorithmicend\ \algorithmicif}
+\algdef{C}[IF]{IF}{ElsIf}[1]%
+   {\algorithmicelse\ \algorithmicif\ \CONDITION{#1}{\ \algorithmicthen}}
+   
+\makeatletter
+\ifthenelse{\equal{\ALG@noend}{t}}%
+   {\algtext*{EndWhile}%
+    \algtext*{EndFor}%
+    \algtext*{EndLoop}%
+    \algtext*{EndIf}%
+   }{}%
+\makeatother
+\fi

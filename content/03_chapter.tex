@@ -1,0 +1,281 @@
+\chapter{Determining Reachability using Strong and Weak Attractors}
+\label{chap:reach}
+In this section, we introduce an algorithm for computing AS-reachability. It is based on the notion of strong- and weak-attractors by Hahn et\ al. \cite{chaudhuri_simple_2016}. We give the following problem statement:
+\begin{myproblem}{Computation of Almost-Sure Reachability for SMGs}{prob:asreach}
+Given a two-player SMG $\mathcal{G}$, a player $i\in\set{0, 1}$ and a set of target states $T$, determine the set $\ASReach_i(T, \mathcal{G})$.
+\end{myproblem}
+
+In the context of AS-reachability, it is not necessary to consider the precise probabilities of a particular transition; knowing whether the probability of the transition is non-zero suffices. It is also useful to introduce an additional ``nature'' player, that replaces the probabilistic choices. This leads us to define a new model, equivalent in terms of AS-reachability, for two-player games:
+\begin{mydefinition}{Reachability Game with Nature (RGN)}{def:rgn}
+Let $\mathcal{G} = (\set{0, 1}, S, A, \set{S_0, S_1}, \Delta, AP, \chi)$ be a two-player SMG.
+
+The equivalent \textit{reachability game with nature} is a tuple $\mathcal{P}=(S_0, S_1, S_N, E)$ with\begin{itemize}
+    \item the state set of the nature player $S_N\defeq\set{(s,a)\in S\times A\mid\Delta(s, a)\neq\bot}$
+    \item and a transition relation $E\defeq\set{(s, (s, a))\in S\times S_N}\cup\\
+    \set{((s,a), s')\in S_N\times S\mid\Delta(s, a)(s')>0}$
+\end{itemize}
+\end{mydefinition}
+The \textit{predecessors} of a set of states $T$ are defined as $\Pred(T) \defeq \set{s' \in S \mid (s', s) \in E, s \in T }$, and the \textit{successors} are defined as $ \Succ(T) \defeq \set{s' \in S \mid (s, s') \in E, s \in T }$. For a single state, set braces may be omitted: $\Pred(s) \defeq \Pred(\set{s})$. Furthermore, we use the following notation to remove a set of states $A$ from a RGN:\\$\mathcal{P}\setminus B\defeq (S_0\setminus B,\ S_1\setminus B,\ S_N\setminus B,\ \set{(s, s')\in E\mid s,s'\notin B})$.
+
+A path $s_0(s_0, a_0)s_1(s_1, a_1)\dots$ of an RGN corresponds to the path $s_0a_0s_1a_1\dots$ in the original SMG. To simplify notation, we use the latter form for RGNs as well. Using this path notation, we can define strategies for RGNs identically to SMGs (see section \ref{def:strat}).
+
+\begin{myexample}{Simple RGN}{exmp:simple_rgn}
+Figure~\ref{fig:example_game_01_rgn} shows an example of a RGN. It is a translation of the SMG shown in figure~\ref{fig:example_game_01} with the player's \textit{triangle} and \textit{circle} forming a coalition. The probabilistic choices are represented by labeled states. For example, the probability distribution $\Delta(s_1, a)$ was replaced by the nature state $(s_1, a)$ with outgoing edges to states that have a non-zero probability under $\Delta(s_1, a)$. The exact values of these probabilities are irrelevant for the RGN. 
+\end{myexample}
+
+\input{figures/example_game_01_as_rgn}
+
+
+
+\section{Strong Attractors}\label{sec:satr}
+Let $\mathcal{P}=(S_0, S_1, S_N, E)$ be a RGN. To understand AS-reachability in RGNs, it can be helpful to imagine the current state as a ``pebble'' on the game graph, with players moving this pebble across states according to their strategies. We consider the set of pebble positions (states) from which a player $i\in\set{0, 1}$ can force the pebbles into a target set $T\subseteq S$ with cooperation of the nature player. This set is called the \textit{strong attractor} of $T$, denoted $\satr_i(T, \mathcal{P})$. And we will see that this corresponds to those states from which the player can reach the target set with a non-zero probability in the original game $T$.
+
+
+To compute \( \satr_i(T, \mathcal{P}) \), we use a fix-point calculation. Starting with the target set \( T \), we iteratively look at each predecessor state $s$ of the current working set and add it if it meets the following conditions:
+\begin{enumerate}
+    \item\( s \) belongs to player \( i \) or the nature player (\( s\in S_i \cup S_N \)), or
+    \item\( s \) belongs to the opposing player (\( s\in S_{1-i} \)), and all successor states of \( s \) are already in the working set.
+\end{enumerate}
+
+Formally, we compute a sequence of sets $(A_k)_{k\in\N}$ with:
+\begin{alignat*}{2}
+    A_0 &\defeq T\\
+    A_{k+1} &\defeq A_k&&\cup\set{s\in S_i\cup S_N\mid \exists s'\in A_k: (s, s')\in E}\\
+    & &&\cup\set{s\in S_{1-i}\mid\forall (s, s')\in E: s'\in A_k}\\
+    &= A_k&&\cup\set{s\in \Pred(A_k)\mid s\in S_i\cup S_N\text{ or } \Succ(s)\subseteq A_k}
+\end{alignat*}  
+The strong attractor for player $i$ of $T$ is then given by:\[
+    \satr_i(T, \mathcal{P}) = \bigcup_{k\in\N} A_k
+    \]
+\begin{mytheorem}{Strong Attractors Compute Positive Reachability}{prop:reach}\label{prop:reach}
+    Let $\mathcal{G} = (\set{0, 1}, S, A, \set{S_0, S_1}, \Delta, AP, \chi)$ be a two-player SMG and\\
+    $\mathcal{P}=(S_0, S_1, S_N, E)$ be the corresponding RGN. It holds that:\[
+        \satr_i(T, \mathcal{P})\cap S = \Reach_i(T, \mathcal{G})\hspace{1.5cm}i\in\set{0, 1}
+        \]
+\end{mytheorem}
+
+\begin{proof}
+    We first show that $\satr_i(T, \mathcal{P})\cap S \subseteq \Reach_i(T, \mathcal{G})$ by induction:
+    
+    Every state $s\in\satr_i(T, \mathcal{P})\cap S_i$ is either in $T$ or there is a $k\in\N$, s.t. $s\in A_{k+1}$, $s\notin A_k$. Let $(s, a_s)\in S_N\cap A_k$ denote a successor state of $s$ in $A_k$. There is such a state, as all successor states of $s$ belong to the nature player $S_N$. For any prefix $\lambda\in (SA)^\ast$, we define a strategy $\sigma_i$ for player $i$ as follows:\[
+        \sigma_i(\lambda s)\defeq\begin{cases}
+            \delta_{a_s} & \text{ if } s\in\satr_i(T, \mathcal{P})\\
+            \delta_a\;\text{ for some } a\in A(s) & \text{ otherwise }
+        \end{cases}
+        \]
+    And let $\sigma_{1-i}$ be an arbitrary strategy for the other player.
+    
+    It trivially holds that:\[
+        \Pr_s^{(\sigma_0, \sigma_1)}(\Reach(T))>0 \;\text{ for } s\in T
+    \]
+    Let $k\in\N$ and $P_s^{(\sigma_0, \sigma_1)}(\Reach(T))>0$ for all $s\in A_j\cap S, j\leq k$. For all $s'\in A_{k+1}\cap S$ it holds that, if
+    \begin{description}
+        \item[Case 1: $s'\in S_i$.] 
+         Then $\sigma_i(s')=\delta_{a_{s'}}$. This means player $i$ chooses the action $a_{s'}$ according to his strategy $\sigma_i$. As $(s', a_{s'})\in A_k$ and $(s', a_{s'})\notin T$, it has a successor $s''\in A_k$ and as $(s', a_{s'})\in S_N$, it holds that $\Delta(s', a_{s'})(s'')>0$.
+        \item[Case 2: $s'\in S_{1-i}$.]
+        Let $\sigma_{1-i}(s')$ be any distribution over $A(s')$ and let $a\in A$ be an action with $\sigma_{1-i}(s')(a)>0$. As all successors of $s'$ are in $A_k$, it holds that $(s', a)\in A_k$. Analogously to above, it follows: $P_{s'}^{(\sigma_0, \sigma_1)}(\Reach(T))>0$.
+    \end{description}
+    We can deduce inductively that $\satr_i(T, \mathcal{P})\cap S \subseteq \Reach_i(T, \mathcal{G})$.
+    
+    Now, to show the other inclusion, let $s\in S\setminus\satr_i(T, \mathcal{P})$. There exists no $k\in\N$ with $s\in A_k$. This also means that if
+    \begin{description}
+        \item[Case 1:] $s$ belongs to player $i$, then $\Succ(s)\cap\satr_i(T, \mathcal{P})=\emptyset$ or if
+        \item[Case 2:] $s$ belongs to player $1-i$, then $\Succ(s)\cap(S_N\setminus\satr_i(T, \mathcal{P}))\neq\emptyset$.
+    \end{description}
+    Let  $(s, a_s)\in S_N\setminus\satr_i(T, \mathcal{P})$ denote a successor of $s$. For any prefix $\lambda\in (SA)^\ast$, we define a strategy for player $1-i$:
+    \[
+        \sigma_{1-i}(\lambda s)\defeq\begin{cases}
+            \delta_{a_s} & \text{ if } s\notin\satr_i(T, \mathcal{P})\\
+            \delta_a\;\text{ for some } a\in A(s) & \text{ otherwise }
+        \end{cases}
+    \]
+    Let $\sigma_i$ be an arbitrary strategy of player $i$. If
+    \begin{description}
+        \item[Case 1: $s\in S_i$], then any following state with a non-zero probability under $\sigma_i$ has to be outside of $\satr_i(T, \mathcal{P})$, as $s$ has no successors in $\satr_i(T, \mathcal{P})$ and any nature state outside of $\satr_i(T, \mathcal{P})$ also has no successors in $\satr_i(T, \mathcal{P})$.
+        \item[Case 2: $s\in S_{1-i}$], then according to the definition of $\sigma_{1-i}$, any following state with a non-zero probability under $\sigma_{i-1}$ is outside of $\satr_i(T, \mathcal{P})$.
+    \end{description}
+    Therefore $P_{s}^{(\sigma_0, \sigma_1)}(\Reach(\satr_i(T, \mathcal{P})))=0$ and as $T\subseteq\satr_i(T, \mathcal{P})$, it also holds that $P_{s}^{(\sigma_0, \sigma_1)}(\Reach(T))=0$. Thus $S\cap\Reach_i(T, \mathcal{G}) \subseteq \satr_i(T, \mathcal{P})$.
+    
+\end{proof}
+\begin{mycorollary}{Memoryless Strategy for Positive Reachability}{lem:memless_satr}\label{lem:memless_satr}
+There is a memoryless strategy for player $i$ reach a target set $T$ with a non-zero probability.
+\end{mycorollary}
+\begin{proof}
+The strategy constructed in the proof for theorem \ref{prop:reach} is memoryless.
+\end{proof}
+
+\begin{myexample}{Strong Attractors}{exmpl:satr}
+Let $\mathcal{P}=(\set{s_1}, \set{s_2, s_3}, \set{(s_1, a), (s_1, b), (s_2, a), (s_2, b), (s_3, c)}, E)$ be the RGN shown in figure~\ref{fig:example_game_01_rgn}, with the square nodes representing player $0$ and the circular nodes representing player $1$. The strong attractor of $T\defeq\set{s_3}$ for player $0$, $\satr_0(\set{s_3}, \mathcal{P})$, can be computed as follows:
+\begin{align*}
+    A_0 &=\set{s_3}\\
+    A_1 &=\set{s_3, \textcolor{myblue}{(s_1, a), (s_2, a), (s_3, c)}}\\
+    A_2 &=\set{s_3, (s_1, a), (s_2, a), (s_3, c), \textcolor{myred}{s_1}}\\
+    A_3 &=\set{s_3, (s_1, a), (s_2, a), (s_3, c), s_1, \textcolor{mygreen}{(s_2, b)}}\\
+    A_4 &=\set{s_3, (s_1, a), (s_2, a), (s_3, c), s_1, (s_2, b), \textcolor{mypink}{s_2}}\\
+    A_5 &=\set{s_3, (s_1, a), (s_2, a), (s_3, c), s_1, (s_2, b), s_2, \textcolor{myorange}{(s_1, b)}}\\
+    A_k &=A_5\quad\text{for }k\geq 5\\
+\satr_0(\set{s_3}, \mathcal{P})&=\set{s_3, (s_1, a), (s_2, c), (s_3, c), s_1, (s_2, b), s_2, (s_1, b)}
+\end{align*}
+Note that $s_2$ was not added to $A_2$ even though it's a predecessor of $(s_2, a)$. This is because it belongs to the adversarial player and has another successor ($(s_2, b)$) that is not in $A_1$. After $(s_2, b)$ is added to $A_3$, $s_2$ gets included in $A_4$, because then all successors of $s_2$ are in $A_3$.
+\end{myexample}
+This example also shows that nature states and non-nature states are added in alternate iterations. We later use this fact in algorithm~\ref{alg:satr}, where two steps are calculated in one iteration. 
+
+
+\section{Weak Attractors}\label{sec:watr}
+Using a procedure to compute strong attractors, we can determine the set of \textit{weak attractors} of a target set \( T \). We will later show that this is identical to computing AS-reachability. Let $\mathcal{P}=(S_0, S_1, S_N, E)$ be a RGN and let \( (B_k)_{k \in \mathbb{N}}, (C_k)_{k \in \mathbb{N}} \) be sequences of state sets. We compute \( B_k \) and \( C_k \) for $k\in\N$ as follows:
+\begin{align*}
+B_0 &\defeq\satr_i(T, \mathcal{P})\\
+C_k &\defeq\satr_{1-i}(S\setminus B_k, \mathcal{P}\setminus T)\\
+B_{k+1} &\defeq\satr_i(T, \mathcal{P}\setminus C_k)
+\end{align*}
+The weak attractor for player $i$ of $T$ then is given by:
+\[
+\watr_i(T,\mathcal{P}) =\bigcap_{k\in\N}B_k
+\]
+The intuition behind this is as follows: In any iteration \( k \), from any state \( s \), whenever a state outside the current working set \( B_k \) is positively reachable for the adversarial player, the target set cannot be AS-reachable from \( s \), so we remove \( s \) from the graph for the next iteration (\( \mathcal{P} \setminus C_k \)). Eventually, the working set will only contain states for which the adversarial player has no strategy to leave the set. This means we can choose a strategy such that the weak attractors are never left and there is a non-zero probability of reaching \( T \). Under such a strategy, the path might follow cycles inside the weak attractors that don't include a state of \( T \), but as these cycles must have a probability smaller than 1 (otherwise \( T \) wouldn't be positively reachable), the probability of not reaching \( T \) is 0. Therefore, the probability of reaching \( T \) is 1.
+
+Figure~\ref{fig:ill:watr} illustrates the principle of weak attractors. In the first iteration, the strong attractor of $T$, $B_0$, was computed. But there is a set of states $C_0$ intersecting $B_0$ from which player $i$ has a strategy to reach $T$, but also player $1-i$ has a strategy for leaving the set $B_0$. By computing $B_1$, we remove the states $B_0\setminus B_1$, from which player $i$ can not enforce reaching $T$ without visiting $C_0$.
+
+
+\input{figures/illustration_watr}
+
+\begin{mytheorem}{Weak Attractors Compute AS-Reachability}{prop:asreach}\label{prop:asreach}
+    Let $\mathcal{G} = (\set{0, 1}, S, A, \set{S_0, S_1}, \Delta, AP, \chi)$ be a two-player SMG and\\
+    $\mathcal{P}=(S_0, S_1, S_N, E)$ be the corresponding RGN. It holds that:\[
+        \watr_i(T, \mathcal{P})\cap S = \ASReach_i(T, \mathcal{G})\hspace{1.5cm}i\in\set{0, 1}
+        \]
+\end{mytheorem}
+    
+
+    
+\begin{proof}
+To prove theorem~\ref{prop:asreach}, we begin by showing a few helpful statements. First, observe that for all $k\in\N$:
+\begin{align}
+B_{k+1}\cap S\subseteq B_k\cap S \text{ and } C_{k+1}\cap S\supseteq C_k\cap S. \label{eq:mono_B_k_C_k}
+\end{align}
+We show this by induction over $k$: For $k=0$, it holds that $B_1\cap S = \Reach_i(T, \mathcal{G}\setminus C_0)$. Any strategy used by player $1$ to reach $T$ in the game $\mathcal{G}\setminus C_0$ also works in the larger game $\mathcal{G}$. Otherwise, there would need to be a state $s\in\mathcal{G}\setminus C_0$ belonging to player $1-i$, from which they can force the play out of $\mathcal{G}\setminus C_k$, but such a state would be in $\Reach_{1-i}(S\setminus B_0, \mathcal{G}\setminus T)=C_0\cap S$ and thus not in $\mathcal{G}\setminus C_0$. Therefore, it holds that $B_{1}\cap S\subseteq B_0\cap S$.
+
+Furthermore, $\Reach_{1-i}(S\setminus B_1, \mathcal{G}\setminus T) = C_1\cap S\supseteq C_0\cap S = \Reach_{1-i}(S\setminus B_0, \mathcal{G}\setminus T)$, as $S\setminus B_1\supseteq S\setminus B_0$.
+
+Now let equation~\ref{eq:mono_B_k_C_k} hold for a $k\in\N$. With the same reasoning as above, any strategy used by player $1$ to reach $T$ in the game $\mathcal{G}\setminus C_{k+1}$ also works in the larger game $\mathcal{G}\setminus C_{k}$. Thus $B_{k+1}\cap S = \Reach_i(T, \mathcal{G}\setminus C_k)\subseteq \Reach_i(T, \mathcal{G}\setminus C_{k-1})=B_{k}\cap S$.
+
+Similarly to above, it also holds that: $\Reach_{1-i}(S\setminus B_{k+1}, \mathcal{G}\setminus T) = C_{k+1}\cap S\supseteq C_k\cap S = \Reach_{1-i}(S\setminus B_k, \mathcal{G}\setminus T)$, as $S\setminus B_{k+1}\supseteq S\setminus B_k$. Thus, equation~\ref{eq:mono_B_k_C_k} holds by induction.
+
+Because of this, we can choose an $l\in\N$, such that $B_l\cap S = B_{l+1}\cap S$ and $C_l\cap S = C_{l+1}\cap S$ (such an $l$ exists because $S$ is finite). It holds by the definition of $\watr_i$ that
+\begin{align}
+\watr_i(T, \mathcal{P})\cap S&\stackrel{\ref{eq:mono_B_k_C_k}}{=}B_l\cap S\nonumber\\
+&=\satr_i(T, \mathcal{P}\setminus C_l)\cap S\nonumber\\
+&\stackrel{\ref{prop:reach}}{=}\Reach_i(T, \mathcal{G}\setminus C_l)\label{eq:satr_l}
+\intertext{and}
+C_l\cap S &= \satr_{1-i}(S\setminus B_l, \mathcal{P}\setminus T)\cap S\nonumber\\
+&\stackrel{\ref{prop:reach}}{=} \Reach_{1-i}(S\setminus B_l, \mathcal{G}\setminus T)\nonumber\\
+&= \Reach_{1-i}(S\setminus \watr_i(T, \mathcal{P}), \mathcal{G}\setminus T).\label{eq:C_l}
+\end{align}
+
+To show \say{$\subseteq$} of theorem~\ref{prop:asreach}, let $s\in\watr_i(T, \mathcal{P})$. By equation~\ref{eq:satr_l}, there is an $l\in\N$ such that $s\in\Reach_i(T, \mathcal{G}\setminus C_l)$. Let $\sigma_i^\ast$ be the corresponding strategy of player $i$ to reach $T$ in the game $\mathcal{G}\setminus C_l$, and let $\sigma_{1-i}$ be an arbitrary strategy for player $1-i$. It holds that $\Pr_s^{(\sigma_0^\ast, \sigma_1)}(\Reach(T)) > 0$. For the sake of contradiction, assume that for some $\sigma_i$, it holds that $\Pr_s^{(\sigma_0, \sigma_1)}(\Reach(T))< 1$. This means either there is a strategy $\sigma_{1-i}$, such that, with a positive probability, the play leaves $\watr_i(T, \mathcal{P})$ without visiting $T$ (case 1), or the play stays in $\watr_i(T, \mathcal{P})\setminus T$ indefinitely with a positive probability (case 2).
+
+\begin{description}
+    \item[Case 1:] It holds that $\forall\sigma_i\exists\sigma_{1-i}:\Pr_s^{(\sigma_0, \sigma_1)}(\Reach(S\setminus\watr_i(T, \mathcal{P}))\cap (S\setminus T)^\omega) > 0$. By determinacy (see theorem~\ref{theo:reach_det}) the player $1-i$ has a strategy $\sigma_{1-i}'$ such that $\forall\sigma_i: \Pr_s^{(\sigma_0, \sigma_1)}(\Reach(S\setminus\watr_i(T, \mathcal{P}))\cap (S\setminus T)^\omega) > 0$ and therefore $s\in C_l\cap S\stackrel{\ref{eq:C_l}}{=}\Reach_{1-i}(S\setminus \watr_i(T, \mathcal{P}), \mathcal{G}\setminus T)$, which is a contradiction to $s\in\Reach_i(T, \mathcal{G}\setminus C_l)$.
+    
+
+    \item[Case 2:] In this case, let $W\coloneqq\watr_i(T,\mathcal{P})\setminus T$ and let $P\coloneqq (WA)^\omega$ denote the set of paths that always stay in $W$. It holds that $\forall\sigma_i\exists\sigma_{1-i}: \Pr_s^{(\sigma_0, \sigma_1)}(P) > 0$.
+    
+    Observe that for any $s'\in W$ it cannot hold, that a state inside $W$ is visited twice with probability $1$:\[
+    \forall\sigma_i\exists\sigma_{1-i}: \Pr_{s'}^{(\sigma_0, \sigma_1)}(s'A(WA)^\ast s'(SA)^\omega) = 1\] Otherwise a strategy $\sigma_{1-i}$ can be constructed for always staying in $W$ by repeatedly visiting $s'$, and by determinacy, this would mean that $s'\notin\Reach_i(T, \mathcal{G}\setminus C_l)$. Let $p_{s'}<1$ denote the minimal probability with \[
+    \forall\sigma_i\exists\sigma_{1-i}: \Pr_{s'}^{(\sigma_0, \sigma_1)}(s'A(WA)^\ast s'(SA)^\omega) < p_{s'}\].
+    
+    As $W$ has finitely many states, every path inside $P$ has to include at least one state infinitely often. This means $P$ can be rewritten as: \begin{align*}
+        P&=\bigcup_{s\in W}\bigcap_{n\in\N}(sA(WA)^\ast)^n(WA)^\omega\\
+        \intertext{Using this, we can give an upper bound of $\Pr_s^{(\sigma_0, \sigma_1)}(P)$:\footnotemark}
+        \Pr_s^{(\sigma_0, \sigma_1)}(P)&=\Pr_s^{(\sigma_0, \sigma_1)}\left(\bigcup_{s\in W}\bigcap_{n\in\N}(sA(WA)^\ast)^n(WA)^\omega\right)\\
+        &\leq\sum_{s\in W}\Pr_s^{(\sigma_0, \sigma_1)}\left(\bigcap_{n\in\N}(sA(WA)^\ast)^n(WA)^\omega\right)\\
+        \intertext{The probability of each set of paths $(sA(WA)^\ast)^n(WA)^\omega$ is bounded by $p_{s}^n$, as the probability revisiting $s$ once is bounded by $p_s$:}
+        \Pr_s^{(\sigma_0, \sigma_1)}(P)&\leq\sum_{s\in W}p_s^n\quad\text{for all }n\in\N\\
+        &=|W|\cdot p^n\quad\text{for all }n\in\N\\
+        \intertext{Therefore, as $p<1$ and $|W|$ finite:}
+        \Pr_s^{(\sigma_0, \sigma_1)}(P)&=0.
+    \end{align*}
+    This is a contradiction to $\forall\sigma_0\exists\sigma_1: \Pr_s^{(\sigma_0, \sigma_1)}(P) > 0$.
+\end{description}
+\footnotetext{Note that $P$ is measurable by $\Pr_s^{(\sigma_0, \sigma_1)}$ as it is a countable boolean combination of sets in the $\sigma$-algebra.}
+
+As both cases lead to a contradiction, it must hold that $\Pr_s^{(\sigma_0^\ast, \sigma_1)}(\Reach(T)) = 1$ for any $\sigma_{1-i}$. And therefore $s\in\ASReach(T, \mathcal{G}\setminus C_l)$. Finally, note that the strategy $\sigma_0^\ast$ also works for the larger game $\mathcal{G}$. Otherwise, there would need to be a state $s\in\setminus C_l$ belonging to the player $1-i$, from which they can force the play out of $\mathcal{G}\setminus C_l$ before reaching $T$, but such a state would be in $\Reach_{1-i}(S\setminus \watr_i(T, \mathcal{P}), \mathcal{G}\setminus T)=C_l\cap S$ and thus not in $s\in\mathcal{G}\setminus C_l$. Thus, $s\in\ASReach(T, \mathcal{G})$.
+
+To show \say{$\supseteq$} of theorem~\ref{prop:asreach}, let $s\notin S\cap\watr_i(T, \mathcal{P})$, this means $s\notin\Reach_i(T, \mathcal{G}\setminus C_l)$. Thus, in the game $\mathcal{G}\setminus C_l$, it holds that $\forall\sigma_i\exists\sigma_{1-i}\Pr(\Reach(T))<1$ and by determinacy player $1-i$ has a strategy $\sigma_{1-i}'$ for not reaching $T$ with a positive probability. We can differentiate between two cases:
+\begin{description}
+    \item[Case 1:] Player $i$ is not able to force the play out of $\mathcal{G}\setminus C_l$. In this case, $\sigma_{1-i}'$ is also a strategy for not reaching $T$ in the game $\mathcal{G}$.
+    \item[Case 2:] Player $i$ is able to force the play out of $\mathcal{G}\setminus C_l$ to a state $s'\in C_l$ with a positive probability. Then player $1-i$ has a strategy to reach $S\setminus B_l$, as $s'\in\Reach_{1-i}(S\setminus B_l, \mathcal{G}\setminus T)$. For $s\in S\setminus B_l$, it holds that $s\notin\Reach_i(T, \mathcal{G}\setminus C_{l-1})$, which means in the game $\mathcal{G}\setminus C_{l-1}$ it holds that $\forall\sigma_i\exists\sigma_{1-i}\Pr(\Reach(T))<1$.
+ Similarly to above, this means that player $1-i$ either has a strategy for not reaching $T$ in $\mathcal{G}$, or, if player $i$ forces the play to a state $s''\in C_{l-1}$, $s''\in\Reach_{1-i}(S\setminus B_{l-1}, \mathcal{G}\setminus T)$.
+ \end{description}
+ In this fashion, we can recursively construct a strategy for player $1-i$; in the last step, player $1-i$ can force the play out of $B_0=\satr_i(T, \mathcal{P})$ and as there are only finitely many steps, we end up with a strategy that has a positive probability of not reaching $T$ in the game $\mathcal{G}$.
+ 
+Therefore, $s\notin\ASReach(T, \mathcal{G})$.
+\end{proof}
+
+\begin{mycorollary}{Memoryless Strategy for AS-Reachability}{lem:memless_watr}\label{lem:memless_watr}
+There is a memoryless strategy for player $i$ to reach a target set $T$ with probability $1$.
+\end{mycorollary}
+\begin{proof}
+The strategy constructed in the proof for theorem \ref{prop:asreach} is memoryless.
+\end{proof}
+
+\input{figures/example_game_02_watr}
+\begin{myexample}{Weak Attractors}{ex:watr}
+Let $\mathcal{P}=(\set{s_1, s_3}, \set{s_2, s_4}, \set{(s_1, a), (s_1, b), (s_2, b), (s_3, a), (s_3, b), (s_4, a)}, E)$ be the RGN shown in figure~\ref{fig:example_game_02_watr}, with the square nodes representing player $0$ and the circular nodes representing player $1$. The weak attractor of $T\defeq\set{s_1}$ for player $0$, $\watr_0(\set{s_1}, \mathcal{P})$, can be computed as follows:
+\begin{align*}
+    B_0 &= \set{s_1, s_2, s_3, (s_1, a), (s_1, b), (s_2, b), (s_3, a), (s_3, b)}\\
+    C_0 &= \set{\textcolor{myblue}{s_4}, \textcolor{myblue}{(s_3, b)}, \textcolor{myblue}{(s_4, a)}}\\
+    B_1 &= \set{s_1, s_2, (s_1, a), (s_1, b), (s_2, b)}\\
+    C_1 &= \set{\textcolor{myred}{s_2}, \textcolor{myred}{s_3}, s_4, \textcolor{myred}{(s_1, b)}, \textcolor{myred}{(s_2, b)}, \textcolor{myred}{(s_3, a)}, (s_3, b), (s_4, a)}\\
+    B_2 &= \set{s_1, (s_1, a)}\\
+    C_k &= C_1\quad\text{ for }k\geq 1\\
+    B_k &= B_2\quad\text{ for }k\geq 2\\
+\watr_0(\set{s_1}, \mathcal{P})&=\set{s_1, (s_1, a)}
+\end{align*}
+Note that at first $s_3$ is not included in $C_0$ as player $0$ can prevent player $1$ from reaching $S\setminus B_0$ by always taking the self loop. But it is not included in $B_1$ as player $0$ is no longer allowed to utilize the nature state $(s_3, b)$. Therefore, it is included in $C_1$, as well as the states from which player $1$ can enforce reaching $s_3$.
+\end{myexample}
+
+\section{Algorithm}
+\label{sec:algorithm}
+\input{figures/alg_strong}
+\input{figures/alg_weak}
+
+Algorithm~\ref{alg:satr} describes the procedure for computing strong attractors. The input consists of a two-player SMG $\mathcal{G} = (\set{0, 1}, S, A, \set{S_0, S_1}, \Delta, AP, \chi)$. We assume a sparse matrix representation of the transition relation $\Delta$, which enables efficient lookup of the predecessor states of state $s$
+($\Pred_\Delta(s)\defeq \{s' \in S \mid \exists a \in A(s) \text{ with } \Delta(s', a)(s) > 0\}$), the available actions of the state ($A(s)$), and the successor states for a given action $a \in A(s)$ ($\Succ_\Delta((s, a)) \defeq \{s' \in S \mid \Delta(s, a)(s') > 0\}$).
+
+The procedure \texttt{StrongAttractors}$(S_0, S_1, A, \Delta, i, T, S_\text{allowed}, \Delta_\text{allowed})$ computes the strong attractor $\satr_i(T, \mathcal{P})$ where $\mathcal{P} = (S_0 \cap S_\text{allowed}, S_1 \cap S_\text{allowed}, \Delta_\text{allowed}, E)$. This is done in layers, with each iteration computing a new set of states $B \subseteq S$ and updating the set of nature states $\Delta_{\satr}$.
+
+In the first step, we initialize the strong attractor set $\satr \gets T$ and the set of nature states $\Delta_{\satr} \gets \emptyset$. In each iteration, we first compute the predecessors $P$ of the previous layer $B$ (line~\ref{alg:satr:pred}), excluding those already in $\satr$. 
+
+We update the set of nature states in the strong attractor by considering the outgoing edges of $P$ (lines~\ref{alg:satr:bdelta} to~\ref{alg:satr:edelta}). After updating $\Delta_{\satr}$, we filter $P$ to only include the allowed states (line~\ref{alg:satr:allowed}). This step is performed after updating $\Delta_{\satr}$ because we would otherwise miss allowed nature states that are successors of disallowed states.
+
+For each state $s \in P$, we check if it can be added to the strong attractor. If $s$ belongs to player $i$, we check if there is a following nature state in $\Delta_{\satr}$. This check is necessary because the connecting nature state might be disallowed, even if $s$ is a predecessor of $\satr$. If $s$ belongs to the other player, all following nature states must be in $\Delta_{\satr}$ for $s$ to be added to the attractor (lines~\ref{alg:satr:bcheck} to~\ref{alg:satr:echeck}).
+
+\input{figures/example_worst_case}
+\begin{mytheorem}{Computational Complexity of Positive Reachability}{theo:satr_runtime}
+Let $\mathcal{G}$ be a two-player SMG and $T$ a set of target states. It holds that:
+
+Calculating the set $\Reach_i(T, \mathcal{G})$ for a player $i\in\set{0,1}$ using the \texttt{StrongAttractors} procedure takes $\Theta(|\Delta|)$ computational steps in the worst case.
+\end{mytheorem}
+\begin{proof}
+The procedure \texttt{StrongAttractors} calculates $\Reach_i(T, \mathcal{G})$. Every state of $\mathcal{G}$ is added at most once to the working set $B$. In each iteration, we iterate over all outgoing transitions of the states in $B$. Therefore, we consider each transition at most once and need at most $O(|\Delta|)$ computational steps.
+
+On the other hand, figure~\ref{fig:example_worst_case} shows an RNG for which the \texttt{StrongAttractors} procedure explores every transition except $(s_n, a)$ when calculating  $\Reach_0(\set{t_n}, \mathcal{G})$. Thus taking $|\Delta|$ steps.
+\end{proof}
+
+By processing the states in layers, we ensure that the successors of each state are considered only once, leading to a runtime of $O(|\Delta|)$.
+
+Finally, the procedure returns the of set states $\satr$ and nature states $\Delta_{\satr}$ of the strong attractor.
+
+Algorithm~\ref{alg:watr} describes the procedure for computing weak attractors. It closely mirrors the definition of weak attractors in section \ref{sec:watr}. It alternately calls the \texttt{StrongAttractors} procedure for both players, until a fixed point is reached.
+
+\begin{mytheorem}{Computational Complexity of Almost Sure Reachability}{theo:watr_runtime}
+Let $\mathcal{G}$ be a two-player SMG and $T$ a set of target states. It holds that:
+
+Calculating the set $\ASReach_i(T, \mathcal{G})$ for a player $i\in\set{0,1}$ using the \texttt{WeakAttractors} procedure takes $\Theta(|S|\cdot|\Delta|)$ computational steps in the worst case.
+\end{mytheorem}
+\begin{proof}
+In every iteration at least one non-nature state is removed $B$ and the \texttt{StrongAttractors} procedure is called a constant amount of times. Therefore the algorithm takes at most $|S|$ iterations and $O(|S|\cdot\Delta)$ steps.
+
+On the other hand, figure~\ref{fig:example_worst_case} shows an RNG for which in the $k$-th iteration the state $s_{n-k}$ is included in $B_k$, and then newly added to $C_k$ and consequently not included in the set $B_{k+1}$. Therefore, at least $\frac{|S|}{2}-2\in O(|S|)$ iterations are needed. In each iteration the calculation of $B_k$ involves traversing the upper chain of states ($t_1, \dots, t_n$), taking at least $\frac{|\Delta|}{3}\in\Omega(|\Delta|)$ steps. Therefore, in the worst case, the algorithm takes $\Omega(|\Delta|)$ steps.
+\end{proof}

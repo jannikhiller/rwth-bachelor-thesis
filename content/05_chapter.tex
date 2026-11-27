@@ -1,0 +1,19 @@
+\chapter{Conclusions and Future Work}
+\label{chap:conc}
+
+In this work, we formalized an algorithm for qualitative reachability SMGs with a run time complexity of \(\Theta(nm)\). This algorithm provides a clear and detailed reference for future implementations, addressing the lack of well-documented algorithms for this problem. We have also proven the correctness of the algorithm and provided an implementation that outperforms existing solutions by at least 5 times in experimental evaluations.
+
+Our experimental evaluation compared the algorithm against existing approaches on both synthetic and real-world test cases. The results demonstrate that the implementation is a strong foundation for extending SMG model-checking capabilities in Storm.
+
+\section{Future Work}
+
+There are several directions for future work building upon our work:
+
+\begin{itemize}
+\item \textbf{Implementing Value Iteration for Quantitative Checking:}
+   A natural next step would be to implement value iteration for quantitative model checking in Storm. Our qualitative algorithm could serve as a preprocessing step for this purpose. Given the significant performance improvements of our algorithm over PRISM-games, it is plausible that similar improvements could be achieved for value iteration.
+ \item \textbf{Adapting the Algorithm for Symbolic Representations:}
+   Another promising direction would be to develop a variant of the algorithm for symbolic representations. As our algorithm is adaptable to symbolic approaches, this extension would enable the handling of much larger transition systems.
+  \item \textbf{Exploring Optimizations Using MDP Algorithms:}
+   Finally, it may be worthwhile to investigate potential optimizations by leveraging MDP algorithms for subgraphs of SMGs with a single player. This approach could exploit the lower complexity of MDP algorithms, as observed in our worst-case test case, which was a MDP.
+\end{itemize}

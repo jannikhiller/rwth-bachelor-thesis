@@ -1,0 +1,66 @@
+\chapter{Introduction}
+\label{chap:intro}
+
+\section{Motivation and Context}
+Formal verification of systems is of critical importance, particularly in safety-critical applications. Examples include autonomous driving, energy management, and communication protocols, where even minor failures can lead to catastrophic consequences.
+
+Many of these applications exhibit both nondeterministic and probabilistic behavior. Such systems can be naturally modeled using Markov Decision Processes (MDPs) \cite{puterman_markov_2014}. MDPs provide a formal framework to capture systems with stochastic transitions and nondeterministic choices.
+
+MDPs can be extended to accommodate multiple actors (players), where each player controls a subset of the nondeterministic choices. The resulting formalism is referred to as a \textit{Stochastic Multiplayer Game (SMG)}. SMGs are a powerful model for systems that involve competition or collaboration between agents, alongside probabilistic dynamics.
+
+SMGs have a wide range of practical applications, including:
+\begin{itemize}
+    \item \textbf{Security and communication protocols}: Ensuring robustness in adversarial environments \cite{kremer_game-based_2001, park_lisp_2004, perrig_spins_2001, van_der_hoek_model_2003, wu_model_2005}.
+    \item \textbf{Robotics and pursuit-evasion games}: Modeling strategies for multiple interacting robots \cite{hespanha_multiple-agent_1999}.
+    \item \textbf{Energy markets}: Simulating competition and cooperation in future energy systems \cite{hildmann_influence_2011, chen_automatic_2013}.
+    \item \textbf{Sensor networks}: Optimizing collective decision-making processes in distributed systems \cite{saffre_host_2012, chen_automatic_2013}.
+\end{itemize}
+
+\textbf{Qualitative reachability} is a fundamental objective in the analysis of SMGs. It focuses on determining whether a player is able to enforce reaching a target set of states with probability $0$ or $1$, regardless of the strategies employed by the other players. Reachability serves as a crucial preprocessing step in established model checkers for stochastic systems, such as Storm \cite{hensel_probabilistic_2020} and PRISM-games \cite{chen_automatic_2013}.
+
+In this thesis, we present an algorithm for qualitative reachability. Although similar algorithms are implemented in existing model checking tools such as PRISM-games, this thesis extends prior work by providing a detailed formalization and a rigorous correctness proof. The algorithm can serve as a reference for future implementations.
+
+The algorithm is based on a fixed-point calculation. The main idea is to maintain a working set by repeatedly calculating the set of states from which a player can reach a target set with a non-zero probability, while disregarding the states from which the adversarial players can enforce leaving the working set with non-zero probability. In each iteration, more such states are determined and subsequently disregarded when computing the next working set. Eventually the working set only contains states from which the player can reach the target set with probability $1$.
+
+We also introduce an improvement over the implementation in PRISM-games. To compute the set of states from which the target set can be reached with a non-zero probability, PRISM-games repeatedly iterates over all states. Our approach improves upon this by working in layers of states, each of which consists of predecessor states of the previous layer.
+
+\section{Related Work}
+Several works have addressed the verification of SMGs and related models.
+
+Chatterjee et al. \cite{chatterjee_simple_2003} focus on qualitative properties expressed in $\omega$-regular specifications within the context of two-player stochastic games. They propose an efficient translation of these games into non-stochastic parity games, enabling the use of established algorithms for analysis. For the specific case of Markov Decision Processes (MDPs) with Büchi objectives, where the goal is to reach a target set infinitely often---a stricter condition than simple reachability---they present an algorithm with a time complexity of $O(m \sqrt{m})$.
+
+In subsequent work, Chatterjee et al. \cite{chatterjee_on2_2011} describes an $O(n^2)$ algorithm for Büchi objectives in alternating games. They utilize a dynamic programming approach and their method is further extended to stochastic alternating games, which are a subclass of stochastic multi-player games (SMGs), providing an algorithm for almost-sure reachability with $O(nm)$ runtime.
+
+Chen et al. \cite{chen_automatic_2013, chen_automatic_2013-1} presented methods for model checking SMGs in the probabilistic model checker PRISM-games\cite{lahiri_prism-games_2020}. Their work focuses on quantitative properties and uses value iteration as the main computational technique. For qualitative reachability, PRISM-games performs a preprocessing step, but the algorithm is not formally described. PRISM-games is used as a baseline implementation for our experiments in chapter~\ref{chap:eval}.
+
+Hahn et al. \cite{chaudhuri_simple_2016} present an algorithm for qualitative parity objectives in stochastic multi-player games (SMGs) with a runtime of $O(n^{O(\sqrt{n})})$. Their work adapts an algorithm originally designed for non-stochastic two-player games to the SMG setting. Additionally, their definitions of strong and weak attractors served as a foundation for the development of our algorithm.
+
+
+\section{Contributions}
+This thesis makes several significant contributions to the field of model checking stochastic games:
+
+\begin{itemize}
+    \item We provide a formal definition of an algorithm for computing positive and almost-sure reachability in stochastic games with a runtime of $\Theta(nm)$. It is based on the concept of strong- and weak-attractors by Hahn et\ al. \cite{chaudhuri_simple_2016}. While almost-sure reachability is well-studied, existing literature lacked a clear and rigorous formalization of the algorithm. Such a formalization aids in future implementations of model-checking algorithms for SMGs.
+    \item We prove the correctness of the proposed algorithm. This step is crucial to ensure that the algorithms used for SMG model checking are both reliable and robust.
+    \item We implement a high-performance version of the algorithm for the probabilistic model checker Storm. Since almost-sure reachability can also serve as a preprocessing step for quantitative model checking, our implementation is a foundational building block for further SMG model-checking developments using Storm.
+    \item An experimental evaluation of our implementation demonstrates significant efficiency, outperforming the PRISM model checker by at least a factor of 5, with particularly notable speedups for smaller input sizes.
+\end{itemize}
+
+
+\section{Structure of the Thesis}
+\begin{itemize}
+    \item \textbf{Chapter \ref{chap:intro}: \nameref{chap:intro}}.
+    This chapter provides the motivation and context for the thesis. It introduces the problem, outlines the contributions, and gives an overview of the thesis structure.
+    
+    \item \textbf{Chapter \ref{chap:prelim}: \nameref{chap:prelim}}.  
+    This chapter lays the theoretical groundwork necessary for the thesis. It covers the essential mathematical background in probability theory and provides formal definitions of stochastic games, including qualitative reachability.
+
+    \item \textbf{Chapter \ref{chap:reach}: \nameref{chap:reach}}.
+    This chapter constitutes the main theoretical contribution of the thesis. It introduces the concepts of strong and weak attractors and proves their equivalence to reachability and almost-sure reachability. It also presents an algorithm for computing strong and weak attractors and analyzes its worst-case runtime.
+
+    \item \textbf{Chapter \ref{chap:eval}: \nameref{chap:eval}}.
+    This chapter evaluates the performance and scalability of the implemented algorithm. The algorithm's performance is compared with the model checker PRISM on several real-world and synthetic scenarios.
+
+    \item \textbf{Chapter \ref{chap:conc}: \nameref{chap:conc}}.
+    The final chapter summarizes the findings of the thesis and discusses possible directions for future research.
+\end{itemize}

@@ -1,0 +1,28 @@
+\pgfplotsset{compat=1.18}
+
+
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+    \begin{loglogaxis}[
+        xlabel={Number of States},
+        ylabel={Time (s)},
+        width=10cm,
+        legend pos=north west,
+    ]
+    \addplot[myblue, mark=triangle*] table[x=number_of_states, y=storm_reachability, col sep=comma] {figures/data/bad_runtime_example.csv};
+    \addlegendentry{Storm}
+
+    \addplot[mygreen, mark=square*] table[x=number_of_states, y=prism_reachability, col sep=comma] {figures/data/bad_runtime_example.csv};
+    \addlegendentry{PRISM-games}
+
+    \addplot[mypink, mark=pentagon*] table[x=number_of_states, y=prism_symbolic_reachability, col sep=comma] {figures/data/bad_runtime_example.csv};
+    \addlegendentry{PRISM-games (dd)}
+    \end{loglogaxis}
+\end{tikzpicture}
+\caption{Run time comparison of Storm, PRISM-games (explicit), and PRISM-games (symbolic/dd) for almost-sure reachability checking on Test Case \ref{test:swc} (SWC)}
+\label{fig:plot_swc}
+\end{figure}
+
+

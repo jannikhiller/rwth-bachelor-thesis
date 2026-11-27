@@ -1,0 +1,75 @@
+% abs, norm
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
+
+% footnotemarks inside align
+\makeatletter
+\let\original@footnotemark\footnotemark
+\newcommand{\align@footnotemark}{%
+  \ifmeasuring@
+    \chardef\@tempfn=\value{footnote}%
+    \original@footnotemark
+    \setcounter{footnote}{\@tempfn}%
+  \else
+    \iffirstchoice@
+      \original@footnotemark
+    \fi
+  \fi}
+\pretocmd{\start@align}{\let\footnotemark\align@footnotemark}{}{}
+\makeatother
+
+\newcommand{\defeq}{\vcentcolon=}
+\newcommand{\eqdef}{=\vcentcolon}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Pred}{\operatorname{Pred}}
+\newcommand{\Succ}{\operatorname{Succ}}
+\newcommand{\Reach}{\operatorname{Reach}}
+\newcommand{\Cone}{\operatorname{Cone}}
+\newcommand{\satr}{\operatorname{satr}}
+\newcommand{\watr}{\operatorname{watr}}
+\newcommand{\ASReach}{\operatorname{ASReach}}
+\renewcommand{\Pr}{\operatorname{Pr}}
+\newcommand\CC{
+    C++
+}
+\renewcommand{\set}[1]{\mathopen{}\left\{\;\!#1\;\!\right\}\mathclose{}}
+
+\def\until{\mathsf{U}}
+
+\newcommand{\mycomment}[2][]{\todo[size=\footnotesize, #1]{#2}}
+\newcommand{\mytodo}[2][]{\todo[color=red, size=\footnotesize, #1]{TODO: #2}}
+
+% multiline stuff for algpseudocode
+\iffalse
+\newcommand\CONDITION[2]%
+   {\begin{tabular}[t]{@{}l@{}}#1#2\end{tabular}}
+\algdef{SE}[WHILE]{While}{EndWhile}[1]%
+   {\algorithmicwhile\ \CONDITION{#1}{\ \algorithmicdo}}%
+   {\algorithmicend\ \algorithmicwhile}
+\algdef{SE}[FOR]{For}{EndFor}[1]%
+   {\algorithmicfor\ \CONDITION{#1}{\ \algorithmicdo}}%
+   {\algorithmicend\ \algorithmicfor}
+\algdef{S}[FOR]{ForAll}[1]%
+   {\algorithmicforall\ \CONDITION{#1}{\ \algorithmicdo}}
+\algdef{SE}[REPEAT]{Repeat}{Until}%
+   {\algorithmicrepeat}[1]%
+   {\algorithmicuntil\ \CONDITION{#1}{}}
+\algdef{SE}[IF]{If}{EndIf}[1]%
+   {\algorithmicif\ \CONDITION{#1}{\ \algorithmicthen}}%
+   {\algorithmicend\ \algorithmicif}
+\algdef{C}[IF]{IF}{ElsIf}[1]%
+   {\algorithmicelse\ \algorithmicif\ \CONDITION{#1}{\ \algorithmicthen}}
+   
+\makeatletter
+\ifthenelse{\equal{\ALG@noend}{t}}%
+   {\algtext*{EndWhile}%
+    \algtext*{EndFor}%
+    \algtext*{EndLoop}%
+    \algtext*{EndIf}%
+   }{}%
+\makeatother
+\fi

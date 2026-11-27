@@ -1,0 +1,40 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[>=stealth, node distance=3cm, every node/.style={font=\small}]
+    % Nodes
+    \node[draw, minimum size=1cm, shape=rectangle] (S1) {$\textcolor{myred}{s_1}$};
+    \node[draw, minimum size=1cm, shape=circle,right= 5cm of S1] (S2) {$\textcolor{mypink}{s_2}$};
+    \node[draw, minimum size=1cm, shape=circle, below= 3cm of $(S1)!0.5!(S2)$] (S3) {$s_3$};
+    \draw[-] (S1) -- node[below left, pos=0.5] {} ($(S1)!0.5!(S3)$);
+    \filldraw[black] ($(S1)!0.5!(S3)$) circle (2pt) 
+        node[label={225:$\textcolor{myblue}{(s_1,a)}$}] {}; % Labeled dot at split point
+        
+    \draw[->] ($(S1)!0.5!(S3)$) -- node[below left, pos=0.5] {} (S3);
+    \draw[->] ($(S1)!0.5!(S3)$) -> node[below, pos=0.75] {} (S2);
+    \draw[-] (S2) -- node[below right, pos=0.5] {} ($(S2)!0.5!(S3)$);
+    \filldraw[black] ($(S2)!0.5!(S3)$) circle (2pt) 
+        node[label={315:$\textcolor{myblue}{(s_2,a)}$}] {}; % Labeled dot at split point
+        
+    \draw[->] ($(S2)!0.5!(S3)$) -- node[below right, pos=0.5] {} (S3);
+    \draw[->] ($(S2)!0.5!(S3)$) -- node[below, pos=0.75] {} (S1);
+    \draw[->] (S1) to[bend left=30] node[above, pos=0.25] {} 
+    node[above, pos=0.75] {} coordinate[pos=0.5] (S1S2) (S2);
+    \filldraw[black] (S1S2) circle (2pt) 
+        node[label={90:$\textcolor{myorange}{(s_1, b)}$}] {}; % Labeled dot halfway along the curve
+        
+    \draw[->] (S2) -> node[above, pos=0.25] {} node[above, pos=0.75] {} coordinate[pos=0.5] (S2S1) (S1);
+    \filldraw[black] (S2S1) circle (2pt) 
+        node[label={270:$\textcolor{mygreen}{(s_2, b)}$}] {}; % Labeled dot halfway along the curve
+        
+    \draw[->] (S3) edge[loop below]
+    coordinate[pos=0.5] (S3S3)
+    node[right, pos=0.2] {}
+    node[left, pos=0.8] {} (S3);
+    \filldraw[black] (S3S3) circle (2pt) 
+        node[label=270:{$\textcolor{myblue}{(s_3, c)}$}] {}; % Labeled dot halfway along the curve
+        
+\end{tikzpicture}
+\caption{Translation of the SMG from figure~\ref{fig:example_game_01} into a RGN. The players represented by the circle and triangle nodes have been combined into a coalition.}
+\label{fig:example_game_01_rgn}
+\end{figure}
+

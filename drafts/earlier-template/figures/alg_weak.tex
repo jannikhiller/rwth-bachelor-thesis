@@ -1,0 +1,20 @@
+\begin{algorithm}[t!]
+    \caption{Computation of Weak Attractors}\label{alg:watr}
+    \begin{algorithmic}[1]
+        \Procedure{WeakAttractors}{$S_0, S_1, A, \Delta, i, T, S_\text{allowed}$}
+            \State $B\gets T$
+            \State $\Delta_\text{allowed}\gets (S_0\cup S_1)\times A$
+            \State $B_\text{next}, \Delta_{B, \text{next}}\gets $ \Call{StrongAttractors}{$S_0, S_1, A,\Delta, i, T, S_\text{allowed}, \Delta_\text{allowed}$}
+            \While{$B\neq B_\text{next}$}
+                \State $B\gets B_\text{next}$
+                \State $T_C\gets(S_0\cup S_1)\setminus B$
+                \State $S_{\text{allowed}, C}\gets S_\text{allowed}\setminus T$
+                \State $C, \Delta_C\gets$ \Call{StrongAttractors}{$S_0, S_1, A,\Delta, 1-i, T_C, S_{\text{allowed}, C}, \Delta_\text{allowed}$}
+                \State $S_{\text{allowed}, B}\gets S_\text{allowed}\setminus C$
+                \State $\Delta_{\text{allowed}, B}\gets \Delta_\text{allowed}\setminus \Delta_C$
+                \State $B_\text{next}, \Delta_{B, \text{next}}\gets $ \Call{StrongAttractors}{$S_0, S_1, A,\Delta, i, T, S_{\text{allowed}, B}, \Delta_{\text{allowed}, B}$}
+            \EndWhile
+        \EndProcedure
+        \State \textbf{return} $B$
+    \end{algorithmic}
+\end{algorithm}

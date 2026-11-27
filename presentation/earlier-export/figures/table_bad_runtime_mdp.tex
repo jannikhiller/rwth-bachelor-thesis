@@ -1,0 +1,52 @@
+
+\begin{table}[ht] % Table for Model Building Times
+    \centering
+    \pgfplotstableset{
+        every head row/.style={
+            before row=\toprule, 
+            after row=\midrule
+        },
+        every last row/.style={
+            after row=\bottomrule
+        }
+    }
+    \pgfplotstabletypeset[
+        col sep=comma,
+        string type,
+        columns/number_of_states/.style={column name={\makecell[t]{Number of\\States}}},
+        columns/storm_model_building/.style={column name={\makecell[t]{Storm (s)}}},
+        columns/storm_symbolic_model_building/.style={column name={\makecell[t]{Strom (dd) (s)}}},
+        columns/prism_model_building/.style={column name={\makecell[t]{PRISM-games\\(s)}}},
+        columns/prism_symbolic_model_building/.style={column name={\makecell[t]{PRISM-games\\(dd) (s)}}},
+        % Include only model building columns
+        columns={number_of_states,storm_model_building,storm_symbolic_model_building, prism_model_building,prism_symbolic_model_building},
+    ]{figures/data/bad_runtime_example_mdp.csv}
+    \caption{Model Building Times for Test Case \ref{test:swc} as MDP}
+    \label{tab:swc_mdp_building}
+\end{table}
+
+\begin{table}[ht] % Table for Run time Analysis
+    \centering
+    \pgfplotstableset{
+        every head row/.style={
+            before row=\toprule, 
+            after row=\midrule
+        },
+        every last row/.style={
+            after row=\bottomrule
+        }
+    }
+    \pgfplotstabletypeset[
+        col sep=comma,
+        string type,
+        columns/number_of_states/.style={column name={\makecell[t]{Number of\\States}}},
+        columns/storm_reachability/.style={column name={\makecell[t]{Storm (s)}}},
+        columns/storm_symbolic_reachability/.style={column name={\makecell[t]{Storm (dd) (s)}}},
+        columns/prism_reachability/.style={column name={\makecell[t]{PRISM-games\\(s)}}},
+        columns/prism_symbolic_reachability/.style={column name={\makecell[t]{PRISM-games\\(dd) (s)}}},
+        % Include only run time columns
+        columns={number_of_states,storm_reachability,storm_symbolic_reachability,prism_reachability,prism_symbolic_reachability},
+    ]{figures/data/bad_runtime_example_mdp.csv}
+    \caption{Run time of AS-Reachability for Test Case \ref{test:swc} as MDP}
+    \label{tab:swc_mdp}
+\end{table}

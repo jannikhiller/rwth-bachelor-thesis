@@ -1,0 +1,26 @@
+\chapter{Introduction}
+
+
+\section{Related Work}
+Several works have addressed the verification of SMGs and related models.
+
+
+Chatterjee et al. \cite{chatterjee_simple_2003} focus on qualitative properties expressed in $\omega$-regular specifications within the context of two-player stochastic games. They propose an efficient translation of these games into non-stochastic parity games, enabling the use of established algorithms for analysis. For the specific case of Markov Decision Processes (MDPs) with Büchi objectives, where the goal is to reach a target set infinitely often---a stricter condition than simple reachability---they present an algorithm with a time complexity of $O(m \sqrt{m})$. This demonstrates that the problem of reachability is comparatively harder in SMGs, as evidenced by the $O(n^2)$ runtime of our approach.
+
+In subsequent work, Chatterjee et al. \cite{chatterjee_on2_2011} described an $O(n^2)$ algorithm for Büchi objectives in alternating games. They utilize a dynamic programming approach and their method is further extended to stochastic alternating games, which are a subclass of stochastic multi-player games (SMGs), providing an algorithm for almost-sure reachability with $O(n^2)$ runtime.
+
+Chen et al. \cite{chen_automatic_2013, chen_automatic_2013-1} presented methods for model checking SMGs in the probabilistic model checker PRISM. Their work focuses on quantitative properties and uses value iteration as the main computational technique. For qualitative reachability, PRISM performs a preprocessing step, but the algorithm is not formally described. PRISM is used as a benchmark for this work.
+
+Hahn et al. \cite{chaudhuri_simple_2016} present an algorithm for parity objectives in stochastic multi-player games (SMGs) with a runtime of $O(n^{O(\sqrt{n})})$. Their work adapts an algorithm originally designed for non-stochastic two-player games to the SMG setting. Additionally, their definitions of strong and weak attractors served as a foundation for the development of our algorithm.
+
+
+\section{Contributions}
+This thesis makes several significant contributions to the field of model checking stochastic games:
+
+\begin{itemize}
+    \item We provide a formal definition of an algorithm for computing almost-sure reachability in stochastic games with a runtime of $O(nm)$. While almost-sure reachability is well-studied, existing literature lacked a clear and rigorous formalization of the algorithm. This contribution aids in future implementations of model-checking algorithms for stochastic multi-player games (SMGs).
+    \item The almost-sure reachability algorithm is also designed to serve as a preprocessing step for quantitative model checking. As such, it can act as a foundational building block for further SMG model-checking developments using the Storm model checker.
+    \item We prove the correctness of the proposed algorithm. This step is crucial to ensure that the fundamental algorithms used for SMG model checking are both reliable and robust.
+    \item We implement a high-performance version of the algorithm for the probabilistic model checker Storm. The implementation demonstrates significant efficiency, outperforming the PRISM model checker by at least a factor of 5, with particularly notable speedups for smaller input sizes.
+\end{itemize}
+

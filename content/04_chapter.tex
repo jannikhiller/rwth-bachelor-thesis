@@ -1,0 +1,173 @@
+\chapter{Experimental Evaluation}
+\label{chap:eval}
+
+\section{Implementation in Storm}
+\label{sec:storm_implementation}
+
+Storm is a probabilistic model checker that supports a variety of models, including discrete- and continuous-time Markov chains, Markov decision processes, and modeling languages such as PRISM and JANI. It is implemented in C++ and is designed to be extensible. Storm performed best on the QComp 2019 benchmark set \cite{hensel_probabilistic_2020, hahn_2019_2019}, but does not support SMG model checking.
+
+\subsection*{Implementation Details\footnote{Our source code is publicly available on GitHub: \url{https://github.com/weiss-i-net/storm}}}
+The modular design of Storm facilitated the integration of the stochastic game algorithms without requiring extensive modifications to the existing codebase. However, the large size of the codebase (approximately 170,000 lines of code) posed challenges in understanding and working with the architecture.
+
+The implementation supports properties of the form:
+\[
+\langle\langle C \rangle\rangle\;\mathsf{P}\vartriangle p\; [\phi_1 \, \until \, \phi_2],
+\]
+where $C$ is a coalition of players, $\vartriangle \in \{<, \leq, =, \geq, >\}$, $p \in \set{0, 1}$, and $\phi_1, \phi_2$ are subformulas. All states belonging to the specified coalition are assigned to Player $0$, while the remaining states are assigned to Player $1$.
+
+Storm recursively calculates the sets of states satisfying $\phi_1$ and $\phi_2$, referred to as $\Phi_1$ and $\Phi_2$, respectively. Using these sets, the implementation computes $\Reach_0(\Phi_2, \mathcal{G})$, applying a modified version of the strong attractors routine that restricts Player $0$ to states within $\Phi_1$.
+
+\begin{lstfloat}
+\begin{lstlisting}[
+    language=C++,
+    caption={A code snippet illustrating the use of C++20's ranges. Instead of using nested for-loops, a range of elements is passed through multiple transformations (so-called range adaptors).},
+    label={lst:ranges}
+]
+auto transitionIndexView = predecessorStates
+    | std::views::transform([&](auto const index) {
+        return transitionMatrix.getRowGroupIndices(index);
+    }) 
+    | std::views::join
+    | std::views::filter([&](auto const index) {
+        return allowedTransitions.get(index);
+    })
+    | std::views::filter(transitionLeadsToAttractors);
+
+for (auto const index : transitionIndexView) {
+    transitionsLeadingToAttractors.set(index);
+}
+\end{lstlisting}
+
+\end{lstfloat}
+
+As Storm recently adopted C++20, we were able to use modern language features, such as ranges and range adaptors, to implement the code in a functional style. Listing~\ref{lst:ranges} illustrates this. In this snippet, we compute the set of transitions leading into the set of strong attractors from the previous iteration. Instead of a nested for-loop, we start with a range of states, transform it into a range of ranges of outgoing transitions, flatten it into a single range of transitions, and filter out the transitions that are not allowed or do not lead to the attractor set. Note that the resulting \texttt{transitionIndexView} variable is lazily evaluated.
+
+\section{PRISM-games}
+\label{sec:prism}
+
+PRISM-games is the first comprehensive tool for model checking stochastic games \cite{hutchison_prism-games_2013}. Built on the PRISM model checker \cite{kwiatkowska_prism_2011}, it introduces the rPATL logic for expressing properties of SMGs, which is also used by Storm. The tool is implemented in Java.
+
+PRISM-games employs a nested fixpoint computation for AS-reachability in SMGs, which is similar to our algorithm. However, a key distinction lies in the computation of positive reachability (strong attractors). PRISM-games iterates over all states repeatedly, checking whether each state’s successors belong to the working set and meet the inclusion criteria. In contrast, our approach processes only the predecessors of each state in the working set, working backwards through layers.
+
+A notable feature of PRISM-games is its support for calculations on symbolically represented SMGs. Instead of explicitly storing every state and its successors in a transition matrix, the tool uses multi-terminal binary decision diagrams (MTBDDs) to represent states and transitions compactly.
+
+Both tools provide multiple \textit{engines} that can be selected during execution. For our evaluation, we focus on the \textit{explicit} and \textit{symbolic} engines (denoted as "dd" in diagrams), which correspond to the explicit and symbolic storage of the transition system, respectively. Our algorithm for AS-reachability in SMGs is only supported by the explicit engine, whereas PRISM-games supports both explicit and symbolic engines. Additionally, both tools allow the use of these engines for MDPs.
+
+
+\section{Research Questions}
+\label{sec:rqs}
+To guide the experimental evaluation, we aim to explore the following research questions:
+\begin{itemize}
+    \item[\textbf{RQ1}:] How does the performance of our algorithm compare to the existing implementation in PRISM-games?
+    \item[\textbf{RQ2}:] How much performance gain is achieved by performing the computations symbolically?
+    \item[\textbf{RQ3}:] How does the performance of our algorithm, when run on MDPs, compare to existing implementations for MDPs in PRISM-games and Storm?
+    \item[\textbf{RQ4}:] How does real-world performance compare to the worst-case performance?
+\end{itemize}
+
+
+\section{Test Cases}
+\label{sec:test_cases}
+
+To investigate the research questions outlined earlier, we consider the following test cases. Each case will be evaluated using the explicit engine for SMGs in Storm (our algorithm) and the explicit and symbolic engines for SMGs in PRISM-games. For MDPs, both Storm and PRISM-games offer explicit and symbolic engines, which will also be included in the evaluation.
+
+\begin{enumerate}
+    \item\label{test:swc} \textbf{Synthetic SMG with Theoretical Worst-Case Complexity (SWC):} 
+    We use a synthetic stochastic multiplayer game (SMG) that theoretically exhibits an \(O(n \cdot m)\) run time complexity, as illustrated in Figure~\ref{fig:example_worst_case}. This test case is designed to examine the worst-case run time of our algorithm. As this SMG also represents an MDP (since it has only one player), we will evaluate its performance using the explicit and symbolic MDP engines in both Storm and PRISM-games.
+
+    \item\label{test:inv} \textbf{Investor in a Futures Market (INV):} 
+    This example models the expected wealth of an investor in a futures market, adapted from \cite{mciver_results_2003}. At discrete time steps (months), the investor can nondeterministically decide whether to reserve a stock for the next month. A month later, the stock is delivered, and the investor decides whether to sell it or not. The price of the stock follows a probabilistic distribution. This real-world scenario is chosen to evaluate practical performance. We will focus on reachability properties, verifying from which states the investor can almost surely reach the set of states where profit has been made. This test case will be evaluated using the explicit and symbolic engines for SMGs in PRISM-games and the explicit engine for SMGs in Storm. The model is dependant on two parameters the initial value \texttt{vinit} and the maximum value \texttt{vmax}. We set \texttt{vmax} to values between $2$ and $40$ and \texttt{vinit} to $\frac{\texttt{vmax}}{2}$, resulting in transition systems with between $1144$ and $6542393$ states.
+\end{enumerate}
+
+\subsection{Test Setup}
+\label{subsec:test_setup}
+
+All experiments were conducted on a laptop with the following specifications:
+
+\begin{itemize}
+    \item \textbf{Processor:} Intel Core i7-8650U
+    \item \textbf{Memory:} 8 GB of RAM
+    \item \textbf{Operating System:} Debian 12 running under Windows Subsystem for Linux (WSL) on Windows 11 (version H23H2).
+\end{itemize}
+
+The default configuration of WSL was adjusted to utilize the full 8 GB of RAM available on the system. For the experiments, the following software versions were used:
+
+\begin{itemize}
+    \item \textbf{Storm:} Version 1.9.0, which served as the basis for our implementation.
+    \item \textbf{PRISM-games:} Version 3.2.1.
+\end{itemize}
+
+Each test case was executed until completion or until the process ran out of memory. Run time measurements were taken by parsing the reported run times for each stage of model checking from the output of the programs. This allowed us to isolate the time taken for calculating qualitative reachability, disregarding other steps such as model building and quantitative model checking performed by the programs. However, this approach has the drawback of limiting the resolution of the measurements to \(0.001\) seconds
+
+\section{Results}
+\label{sec:results}
+
+\input{figures/scatter_plot}
+
+\subsection{Test Case \ref{test:swc}}
+\input{figures/plot_swc}
+
+Figure \ref{fig:plot_swc} shows the performance of our implementation compared to PRISM-games on Test Case \ref{test:swc}. Our implementation significantly outperforms the explicit engine of PRISM-games across all tested transition system sizes. The parallel lines for larger numbers of states in the log-log plot indicate similar asymptotic behavior between the two implementations.
+
+Figure \ref{fig:plot_scatter} highlights that our implementation is at least five times faster than the PRISM-games explicit engine for all tested system sizes. For smaller transition systems, the performance advantage increases to up to 50 times or more. However, we cannot confirm exact numbers for these cases, as Storm consistently reported the minimum runtime of $0.001$ seconds. This suggests that PRISM-games has a large constant runtime overhead compared to Storm. In contrast, the straight line for Storm indicates performance closely matching the expected asymptotic behavior with no measurable constant overhead.
+
+Storm also outperforms PRISM-games' symbolic engine up to medium-sized transition systems (around 500 states). This behavior aligns with expectations, as symbolic representations typically excel with larger transition systems. For the largest tested systems, PRISM-games' symbolic engine is roughly five times faster than Storm. Interestingly, even for smaller transition systems, the symbolic engine of PRISM-games outperforms its explicit engine. This result deviates from the common expectation that simpler data structures (explicit representation) perform better on smaller test cases. This discrepancy can be attributed to PRISM-games' explicit engine being implemented in Java, whereas the symbolic operations on the MTBDD are implemented in C.
+
+\input{figures/plot_swc_build}
+
+Figure \ref{fig:plot_swc_build} shows the model building times for the test case. The symbolic engine exhibits significantly higher model building times compared to the explicit engine. This is because the model is provided explicitly; in such cases, the symbolic representation incurs additional overhead during model building. Faster model checking times can be achieved with the symbolic engine, but at the cost of longer model building times.
+
+\subsection{Test Case \ref{test:inv}}
+\input{figures/plot_investor}
+
+Figure \ref{fig:plot_inv} shows the run times for the second test case. In this real-world example, the performance gap between Storm and PRISM-games increases significantly, with Storm outperforming PRISM-games by roughly 25 times (see Figure \ref{fig:plot_scatter}). Storm even outperforms PRISM-games' symbolic engine across all completed tests.
+
+It is important to note that Storm did not finish for the largest input size, and the explicit engine of PRISM-games did not finish for the two largest input sizes, as both ran out of memory. As observed in Test Case \ref{test:swc}, constant overhead in PRISM-games is evident in this scenario as well. Parallel lines in the log-log plot for the explicit engines of PRISM-games and Storm again suggest similar asymptotic behavior.
+
+\input{figures/plot_investor_build}
+
+Figure \ref{fig:plot_inv_build} shows the model building times for this test case. Unlike in the previous test case, the symbolic engine of PRISM-games demonstrates faster model building times for all but the smallest test cases.
+
+\subsection{Test Case \ref{test:swc} as MDP}
+
+In this section, we analyze test case \ref{test:swc} by modeling it as a MDP instead of a SMG. This is feasible because the transition system involves only a single player (see Figure \ref{fig:example_worst_case}).
+
+\input{figures/plot_mdp}
+
+Figure \ref{fig:plot_mdp} presents the performance of the algorithms implemented in PRISM-games and Storm for MDPs, using both explicit and symbolic engines. For comparison, the run times of the SMG algorithms (explicit engines) for both tools are also included.
+
+The results demonstrate that the MDP algorithms are significantly faster than their SMG counterparts. For Storm, this difference is particularly pronounced: with the explicit MDP engine, all test cases except the largest one were solved in $0.001$ seconds or less, which is the smallest measurable time. 
+
+Furthermore, the MDP algorithms exhibit better asymptotic performance; their run time curves have a smaller slope in the log-log plot. However, the symbolic engine of Storm shows considerable model-building overhead. For the largest test case, involving 10,000 states, model construction took over three hours, while PRISM-games completed the same model in just $11$ minutes. Detailed run time statistics can be found in Table \ref{tab:swc_mdp_building} in the appendix.
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{\textbf{RQ1}: Performance Compared to PRISM-games}
+As discussed above, our implementation significantly outperforms PRISM-games' explicit engine, achieving speedups ranging from 5 to 25 times depending on the test case. This performance improvement can be attributed to several factors:
+
+First, our algorithm employs a more efficient approach to calculating strong attractors. Specifically, we begin at the target set and compute backwards in layers (see Section \ref{sec:algorithm}), whereas PRISM-games iterates over all states in each step to check whether their successors are in the working set (see Section \ref{sec:prism}). Since only the predecessor states of the current target set (the next "layer") can contribute to the working set, our approach reduces unnecessary computations and is therefore much more efficient.
+
+Second, part of the performance difference can be attributed to the programming languages used for implementation. Storm is implemented in C++, while PRISM-games is implemented in Java. Java is generally assumed to be 2 to 5 times slower for computational tasks \cite{back_comparing_2017}. The primary reasons for this include:
+\begin{itemize}
+    \item Additional overhead from garbage collection.
+    \item General run time overhead from the Java Virtual Machine (JVM).
+    \item Less efficient optimizations, as Java code is compiled to Java bytecode, whereas C++ code is compiled directly to machine code, enabling architecture-specific optimizations.
+\end{itemize}
+
+\subsection{\textbf{RQ2}: Impact of Symbolic Model Checking}
+We generally observe a significant performance increase when using a symbolic engine, particularly for larger state spaces. This performance difference is more pronounced in the synthetic test case, where symbolic representations demonstrate their advantage in handling large-scale systems efficiently. Additionally, explicit algorithms frequently run out of memory for very large state spaces, further emphasizing the benefits of symbolic methods.
+
+It would be worthwhile to adapt a symbolic version of our algorithm for Storm. As evidenced by the PRISM-games implementation (Section \ref{sec:prism}), our algorithm is adaptable to a symbolic representation.
+
+However, one limitation of symbolic model checking is its reduced usefulness in scenarios where qualitative reachability is primarily a preprocessing step for quantitative algorithms. A key example is Value Iteration \cite{chen_automatic_2013}, the main algorithm used for solving quantitative problems in SMGs, which does not perform well with symbolic representations. This is because Value Iteration requires repeatedly updating the value of every state, an operation that is inherently inefficient on symbolic structures such as MTBDDs.
+
+
+\subsection{\textbf{RQ3}: Performance Compared to MDP Algorithms}
+The MDP algorithms significantly outperform their SMG counterparts on the tested example, both in Storm and PRISM-games. This result aligns with expectations, as qualitative reachability for MDPs is known to have lower algorithmic complexity. Specifically, algorithms with a run time complexity of \(O(m \sqrt{m})\) are available for MDPs \cite{chatterjee_simple_2003}.
+
+This observation suggests a potential optimization for SMGs: for subgraphs that involve only a single player, MDP algorithms could be employed instead of SMG algorithms.
+
+\subsection{\textbf{RQ4}: Real-World vs. Worst-Case Performance}
+Our real-world test case executed significantly faster than the synthetic example when compared with respect to the number of states. In this scenario, the primary limitation shifted from run time to memory consumption, particularly for explicit representations.
+
+This observation suggests that further optimizations to run time may not be necessary for practical applications. However, to substantiate this conclusion, additional case studies would be required.

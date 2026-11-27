@@ -1,0 +1,42 @@
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+    \begin{loglogaxis}[
+        axis equal,
+        width=8cm,
+        height=8cm,
+        xmin=0.0005, xmax=160,
+        ymin=0.0005, ymax=160,
+        xlabel={Storm (s)},
+        ylabel={PRISM-games (s)},
+        legend pos=outer north east,
+        xtick={1e-3,1e-2,1e-1,1e0,1e1,1e2}, % Regular ticks
+        xticklabels={$\leq10^{-3}$,$10^{-2}$,$10^{-1}$,$10^0$,$10^1$,$10^2$},
+        ytick={1e-3,1e-2,1e-1,1e0,1e1,1e2}, % Regular ticks
+        yticklabels={$\leq10^{-3}$,$10^{-2}$,$10^{-1}$,$10^0$,$10^1$,$10^2$},
+    ]
+    \addplot[only marks, mark=*, mark options={myorange}] table[x=storm_reachability, y=prism_reachability, col sep=comma] {figures/data/bad_runtime_example.csv};
+    \addlegendentry{SWC}
+    \addplot[only marks, mark=square*, mark options={mypink}] table[x=storm_reachability, y=prism_symbolic_reachability, col sep=comma] {figures/data/bad_runtime_example.csv};
+    \addlegendentry{SWC (dd)}
+    \addplot[only marks, mark=triangle*, mark options={myred}] table[x=storm_reachability, y=prism_reachability, col sep=comma] {figures/data/investor.csv};
+    \addlegendentry{INV}
+    \addplot[only marks, mark=diamond*, mark options={myblue}] table[x=storm_reachability, y=prism_symbolic_reachability, col sep=comma] {figures/data/investor.csv};
+    \addlegendentry{INV (dd)}
+    
+    \addplot[domain=0.0005:160, samples=100, dashed] {x / 25}
+    node[pos=0.32, anchor=160] {\tiny $\frac{1}{25}\times$};
+    \addplot[domain=0.0005:160, samples=100, dashed] {0.2 * x}
+    node[pos=0.23, anchor=160] {\tiny $\frac{1}{5}\times$};
+    \addplot[domain=0.0005:160, samples=100, dashed] {x}
+    node[pos=0.14, anchor=160] {\tiny $1\times$};
+    \addplot[domain=0.0005:160, samples=100, dashed] {5 * x}
+    node[pos=0.05, anchor=160] {\tiny $5\times$};
+    \addplot[domain=0.0005:160, samples=100, dashed] {25 * x}
+    node[pos=0.05, anchor=160] {\tiny $25\times$};
+    \addplot[domain=0.0005:160, samples=100, dashed] {125 * x}
+    node[pos=0.05, anchor=160] {\tiny $125\times$};
+    \end{loglogaxis}
+\end{tikzpicture}
+\label{fig:plot_scatter}
+\end{figure}

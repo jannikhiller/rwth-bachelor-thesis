@@ -1,0 +1,50 @@
+\begin{proof}
+To prove proposition~\ref{prop:asreach}, we will begin by showing a few helpful statements. First, observe that for all $k\in\N$:\begin{align}
+B_{k+1}\cap S\subseteq B_k\cap S \text{ and } C_{k+1}\cap S\supseteq C_k\cap S \label{eq:mono_B_k_C_k}
+\end{align}
+We show this by induction over $k$: For $k=0$, it holds that $B_1\cap S = \Reach_i(T, \mathcal{G}\setminus C_0)$. Any strategy used from the player $1$ to reach $T$ in the game $\mathcal{G}\setminus C_0$ also works in the larger game $\mathcal{G}$. Otherwise, there would need to be a state $s\in\mathcal{G}\setminus C_0$ belonging to the player $1-i$, from which he can force the play out of $\mathcal{G}\setminus C_k$, but such a state would be in $\Reach_{1-i}(S\setminus B_0, \mathcal{G}\setminus T)=C_0\cap S$ and thus not in $s\in\mathcal{G}\setminus C_0$. Therefore, it holds that $B_{1}\cap S\subseteq B_0\cap S$.
+
+Furthermore, $\Reach_{1-i}(S\setminus B_1, \mathcal{G}\setminus T) = C_1\cap S\supseteq C_0\cap S = \Reach_{1-i}(S\setminus B_0, \mathcal{G}\setminus T)$, as $S\setminus B_1\supseteq S\setminus B_0$.
+
+Now let equation~\ref{eq:mono_B_k_C_k} hold for a $k\in\N$. With the same reasoning as above, any strategy used from player $1$ to reach $T$ in the game $\mathcal{G}\setminus C_{k+1}$ also works in the larger game $\mathcal{G}\setminus C_{k}$. Thus $B_{k+1}\cap S = \Reach_i(T, \mathcal{G}\setminus C_k)\subseteq \Reach_i(T, \mathcal{G}\setminus C_{k-1})=B_{k}\cap S$.
+
+Similarly to above, it also holds that: $\Reach_{1-i}(S\setminus B_{k+1}, \mathcal{G}\setminus T) = C_{k+1}\cap S\supseteq C_k\cap S = \Reach_{1-i}(S\setminus B_k, \mathcal{G}\setminus T)$, as $S\setminus B_{k+1}\supseteq S\setminus B_k$. Thus, equation~\ref{eq:mono_B_k_C_k} holds by induction.
+
+Because of this, we can choose an $l\in\N$, such that $B_l\cap S = B_{l+1}\cap S$ and $C_l\cap S = C_{l+1}\cap S$ (such an $l$ exists, as there are finitely many states). It holds by the definition of $\watr_i$ that
+\begin{align}
+\watr_i(T, \mathcal{P})\cap S&\stackrel{\ref{eq:mono_B_k_C_k}}{=}B_l\cap S\nonumber\\
+&=\satr_i(T, \mathcal{P}\setminus C_l)\cap S\nonumber\\
+&\stackrel{\ref{prop:reach}}{=}\Reach_i(T, \mathcal{G}\setminus C_l)\label{eq:satr_l}
+\intertext{and}
+C_l\cap S &= \satr_{1-i}(S\setminus B_l, \mathcal{P}\setminus T)\cap S\nonumber\\
+&\stackrel{\ref{prop:reach}}{=} \Reach_{1-i}(S\setminus B_l, \mathcal{G}\setminus T)\nonumber\\
+&= \Reach_{1-i}(S\setminus \watr_i(T, \mathcal{P}), \mathcal{G}\setminus T).\label{eq:C_l}
+\end{align}
+
+To show \say{$\subseteq$} of proposition~\ref{prop:asreach}, let $s\in\watr_i(T, \mathcal{P})$. By equation~\ref{eq:satr_l} there is a $l\in\N$, such that $s\in\Reach_i(T, \mathcal{G}\setminus C_l)$. Let $\sigma_i^\ast$ be the corresponding strategy of player $i$ to reach $T$ in the game $\mathcal{G}\setminus C_l$, and let $\sigma_{1-i}$ be an arbitrary strategy. It holds that $\Pr_s^{(\sigma_0^\ast, \sigma_1)}(\Reach(T)) > 0$. For the sake of contradiction, assume that for all $\sigma_i$ it holds that $\Pr_s^{(\sigma_0, \sigma_1)}(\Reach(T)< 1)$. This means either there is a strategy $\sigma_{1-i}$, such that the play leaves $\watr_i(T, \mathcal{P})$ without visiting $T$ with a positive probability (case 1), or the play stays in $\watr_i(T, \mathcal{P})\setminus T$ indefinitely with a positive probability (case 2).\begin{description}
+    \item[Case 1:] It holds that $\forall\sigma_i\exists\sigma_{1-i}:\Pr_s^{(\sigma_0, \sigma_1)}(\Reach(S\setminus\watr_i(T, \mathcal{P}))\cap (S\setminus T)^\omega) > 0$. By determinacy (see theorem~\ref{theo:reach_det}), player $1-i$ has a strategy $\sigma_{1-i}'$ such that $\forall\sigma_i: \Pr_s^{(\sigma_0, \sigma_1)}(\Reach(S\setminus\watr_i(T, \mathcal{P}))\cap (S\setminus T)^\omega) > 0$ and therefore $s\in C_l\cap S\stackrel{\ref{eq:C_l}}{=}\Reach_{1-i}(S\setminus \watr_i(T, \mathcal{P}), \mathcal{G}\setminus T)$, which is a contradiction to $s\in\Reach_i(T, \mathcal{G}\setminus C_l)$.
+
+    \item[Case 2:] In this case, let $W\defeq\watr_i(T,\mathcal{P})\setminus T$ and let $P\defeq (WA)^\omega$ denote the set of paths that always stay in $W$. It holds that $\forall\sigma_i\exists\sigma_{1-i}: \Pr_s^{(\sigma_0, \sigma_1)}(P) > 0$.
+    
+    Observe that for any $s'\in W$ it cannot hold, that a state inside $W$ is visited twice with probability $1$:\[
+    \forall\sigma_i\exists\sigma_{1-i}: \Pr_{s'}^{(\sigma_0, \sigma_1)}(s'A(WA)^\ast s'(SA)^\omega) = 1\] Otherwise a strategy $\sigma_{1-i}$ can be constructed for always staying in $W$ by repeatedly visiting $s'$ and by determinancy, this would mean that $s'\notin\Reach_i(T, \mathcal{G}\setminus C_l)$. Let $p_{s'}<1$ denote the minimal probability with \[
+    \forall\sigma_i\exists\sigma_{1-i}: \Pr_{s'}^{(\sigma_0, \sigma_1)}(s'A(WA)^\ast s'(SA)^\omega) < p_{s'}\]
+    
+
+    As $W$ has finitely many states, every path inside $P$ has to include at least one state infinitely often. This means $P$ can be rewritten as: \begin{align*}
+        P&=\bigcup_{s\in W}\bigcap_{n\in\N}(sA(WA)^\ast)^n(WA)^\omega\\
+        \intertext{Using this, we can give an upper bound of $\Pr_s^{(\sigma_0, \sigma_1)}(P)$:}
+        \Pr_s^{(\sigma_0, \sigma_1)}(P)&=\Pr_s^{(\sigma_0, \sigma_1)}(\bigcup_{s\in W}\bigcap_{n\in\N}(sA(WA)^\ast)^n(WA)^\omega)\\
+        &\leq\sum_{s\in W}\Pr_s^{(\sigma_0, \sigma_1)}(\bigcap_{n\in\N}(sA(WA)^\ast)^n(WA)^\omega)\\
+        \intertext{The probability of each set of paths $(sA(WA)^\ast)^n(WA)^\omega$ is bounded by $p_{s}^n$, as the probability revisiting $s$ once is bounded by $p_s$:}
+        Pr_s^{(\sigma_0, \sigma_1)}(P)&\leq\sum_{s\in W}p^n\quad\text{for all }n\in\N\\
+        &=|W|\cdot p^n\quad\text{for all }n\in\N\\
+        \intertext{Therefore, as $p<1$ and $|W|$ finite:}
+        \Pr_s^{(\sigma_0, \sigma_1)}(P)&=0
+    \end{align*}
+    This is a contradiction to $\forall\sigma_0\exists\sigma_1: \Pr_s^{(\sigma_0, \sigma_1)}(P) > 0$.
+\end{description}
+As both cases lead to a contradiction, it must hold that $\Pr_s^{(\sigma_0^\ast, \sigma_1)}(\Reach(T)) = 1$ for any $\sigma_{1-i}$. And therefore $s\in\ASReach(T, \mathcal{G}\setminus C_l)$. Finally, note that the strategy $\sigma_0^\ast$ also works for the larger game $\mathcal{G}$. Otherwise, there would need to be a state $s\in\mathcal{G}\setminus C_l$ belonging to the player $1-i$, from which he can force the play out of $\mathcal{G}\setminus C_l$ before reaching $T$, but such a state would be in $\Reach_{1-i}(S\setminus \watr_i(T, \mathcal{P}), \mathcal{G}\setminus T)=C_l\cap S$ and thus not in $s\in\mathcal{G}\setminus C_l$. Thus, $s\in\ASReach(T, \mathcal{G})$.
+
+To show \say{$\supseteq$} of proposition~\ref{prop:asreach}, let $s\notin S\cap\watr_i(T, \mathcal{P})$, this means $s\notin\Reach_i(T, \mathcal{G}\setminus C_l$. Thus, regarding the game $\mathcal{G}\setminus C_l$, $\forall\sigma_i\exists\sigma_{1-i}\Pr(\Reach(T))<1$ and by determinancy the player $1-i$ has a strategy for not reaching $T$ with a positive probability. Either this strategy also works for the larger game $\mathcal{G}$, or the player $i$ is able to force the play out of $\mathcal{G}\setminus C_l$ to a state $s'\in C_l$, then the player $1-i$ has a strategy to reach $S\setminus B_l$, as $s'\in\Reach_{1-i}(S\setminus B_l, \mathcal{G}\setminus T)$. For $s\in S\setminus B_l$ it holds that $s\notin\Reach_i(T, \mathcal{G}\setminus C_{l-1})$, that means, regarding the game $\mathcal{G}\setminus C_{l-1}$, $\forall\sigma_i\exists\sigma_{1-i}\Pr(\Reach(T))<1$. Similarly to above, this means that the player $1-i$ either has a strategy for not reaching $T$ in $\mathcal{G}$, or, if player $i$ forces the play to a state $s''\in C_{l-1}$, $s''\in\Reach_{1-i}(S\setminus B_{l-1}, \mathcal{G}\setminus T)$. In this fashion, we can recursively construct a strategy for the player $1-i$; in the last step, the player $1-i$ can force the play out of $B_0=\satr_i(T, \mathcal{P})$ and as there are only finitely many steps, we end up with a startegy that has a positive probability of not reaching $T$ in the game $\mathcal{G}$. Therefore, $s\notin\ASReach(T, \mathcal{G})$.
+\end{proof}

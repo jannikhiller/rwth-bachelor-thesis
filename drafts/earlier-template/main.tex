@@ -1,0 +1,75 @@
+
+% pdflatex, biber, pdflatex, pdflatex
+
+% for printing add margin
+\documentclass[a4paper,titlepage, bibliography=totoc,twoside=semi, BCOR=10mm, openright]{scrbook} 
+
+% for writing 
+% \documentclass[a4paper,titlepage, bibliography=totoc]{scrbook} 
+
+\input{packages.tex}
+\input{macros.tex}
+
+
+\setlength\parindent{0pt} % noindent
+
+\begin{document}
+\listoftodos
+
+\frontmatter
+\include{titlepage}
+
+
+%\includepdf{Formular_Eidesstattliche_Versicherung.pdf}
+
+\include{content/00_abstract.tex}
+
+\clearpage
+\begingroup
+\pagestyle{empty}
+\renewcommand*{\chapterpagestyle}{empty}
+\tableofcontents
+\clearpage
+\endgroup
+
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
+\setcounter{secnumdepth}{2}
+
+\cleardoublepage
+
+\mainmatter
+\include{content/01_chapter}
+\include{content/02_chapter}
+\include{content/03_chapter}
+\include{content/04_chapter}
+
+\appendix
+\include{content/appendix}
+
+
+%%%%%%%%%%%
+\backmatter
+\newpage
+\bibliographystyle{alpha2} % like alpha but keeps capitalization from .bib file
+\bibliography{literature}
+
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
+\setcounter{secnumdepth}{-1}
+\chapter{Index}
+
+\tcblistof{mydefinition}{Definitions}
+
+\tcblistof{mytheorem}{Theorems}
+
+\tcblistof{myexample}{Examples}
+
+
+\let\origaddvspace\addvspace
+\renewcommand{\addvspace}[1]{}
+\KOMAoption{listof}{leveldown,numbered}
+\renewcommand*\listfigurename{Figures}
+%\listoffigures
+\renewcommand{\addvspace}[1]{\origaddvspace{#1}}
+
+
+\end{document}

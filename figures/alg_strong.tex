@@ -1,0 +1,34 @@
+\begin{algorithm}[t!]
+    \caption{Computation of Strong Attractors}\label{alg:satr}
+    \begin{algorithmic}[1]
+        \Procedure{StrongAttractors}{$S_0, S_1, A, \Delta, i, T, S_\text{allowed}, \Delta_\text{allowed}$}
+            \State $\satr\gets  T$
+            \State $\Delta_{\satr} \gets\emptyset$
+            \State $B\gets T$
+
+            \While{$B\neq\emptyset$}
+                \State $P\gets\Pred_\Delta(B)\setminus\satr$\label{alg:satr:pred}
+                \State $B\gets\emptyset$
+                \ForAll{$s\in P, a\in A$ with $\Delta(s, a)\neq\bot$}\label{alg:satr:bdelta}
+                        \If{$\Succ_\Delta((s, a))\cap\satr\neq\emptyset$ \textbf{and} $(s, a)\in\Delta_\text{allowed}$}
+                            \State $\Delta_{\satr}\gets \Delta_{\satr}\cup\set{(s, a)}$
+                        \EndIf
+                \EndFor\label{alg:satr:edelta}
+                \State $P\gets P\cap S_\text{allowed}$\label{alg:satr:allowed}
+                \ForAll{$s\in P$}\label{alg:satr:bcheck}
+                    \If{$s\in S_i$}
+                        \If{there exists a $a\in A(s)$ with $(s, a)\in\Delta_{\satr}$}
+                            \State $B\gets\set{s}$
+                        \EndIf
+                    \Else
+                        \If{for all $a\in A(s)$ it holds that $(s, a)\in\Delta_{\satr}$}
+                            \State $B\gets\set{s}$
+                        \EndIf
+                    \EndIf
+                \EndFor\label{alg:satr:echeck}
+                \State $\satr\gets\satr\cup B$
+            \EndWhile
+            \State \textbf{return} $\satr, \Delta_{\satr}$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
